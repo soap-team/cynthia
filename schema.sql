@@ -1,4 +1,4 @@
-CREATE TABLE Wikis (
+create table Wikis (
     wiki_id             integer,
     wiki_url            text not null,
     hub                 text not null,
@@ -6,7 +6,7 @@ CREATE TABLE Wikis (
     primary key (wiki_id)
 );
 
-CREATE TABLE Pages (
+create table Pages (
     page_id             integer,
     wiki_id             integer not null,
     title               text not null,
@@ -15,7 +15,7 @@ CREATE TABLE Pages (
     primary key (page_id)
 );
 
-CREATE TABLE User_info (
+create table User_info (
     user_id             integer,
     edit_count          integer not null,
     global_edit_count   integer not null,
@@ -24,7 +24,7 @@ CREATE TABLE User_info (
     primary key (user_id)
 );
 
-CREATE TABLE Revisions (
+create table Revisions (
     revision_id         integer,
     page_id             integer not null,
     user_id             integer not null,
@@ -43,7 +43,7 @@ CREATE TABLE Revisions (
     primary key (revision_id)
 );
 
-CREATE TABLE Categories (
+create table Categories (
     revision_id         integer not null,
     damaging            text,
     spam                text,
