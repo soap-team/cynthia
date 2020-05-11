@@ -40,7 +40,7 @@ CREATE TABLE Revisions (
     foreign key (page_id) references Pages(page_id),
     foreign key (user_id) references User_info(user_id),
     foreign key (wiki_id) references Wikis(wiki_id),
-    primary key (id)
+    primary key (revision_id)
 );
 
 CREATE TABLE Categories (
