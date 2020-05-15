@@ -19,6 +19,7 @@ var diffList = [];
  * @param  password the password for the Firebase user
  */
 function login(password) {
+    $('#diff').empty().append("Loading diff...");
     firebase.auth().signInWithEmailAndPassword('noreply@fandom.com', password).then(function() {
         console.log('logged in');
         $('#login-form').hide();
@@ -46,8 +47,10 @@ function logout() {
 }
 
 function showDiff(wiki, revid) {
-   $.get('https://cors-anywhere.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid + '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
+    $('#diff').empty().append("Loading diff...");
+    $.get('https://cors-anywhere.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid + '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
         if (d.query.pages != null) {
+            $('#diff').empty().append('<table id="table"></table>');
             $('#table').empty().append(d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff['*']);
             $('#categories').show();
         } else {
