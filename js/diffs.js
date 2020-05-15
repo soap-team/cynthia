@@ -10,6 +10,11 @@ var config = {
 firebase.initializeApp(config);
 var db = firebase.database();
 
+var dataset = '';
+var diffList = [];
+var wiki = '';
+var revid = '';
+
 /**
  * Login via Firebase to enable write access
  * @param  type the type of login as a string
@@ -19,7 +24,14 @@ function login(password) {
     firebase.auth().signInWithEmailAndPassword('noreply@fandom.com', password).then(function() {
         console.log('logged in');
         $('#login-form').hide();
-        showDiff('https://leagueoflegends.fandom.com/', '2984657');
+        db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
+            snapshot.val().forEach(function(e) {
+                diffList.push(e);
+            })
+            wiki = diffList[0].split('wiki')[0];
+            revid = diffList[0].split('diff=').pop();
+            showDiff(wiki, revid);
+        });
     }).catch(function(error) {
         $('body').append('Error: ' + error.message);
     });
@@ -30,7 +42,7 @@ function logout() {
     firebase.auth().signOut().then(function(d) {
         console.log("logged out");
     }).catch(function(error) {
-        $('body').append(error.code + ' Error: ' + error.message);
+        $('body').append('Error: ' + error.message);
     });
 }
 
@@ -55,10 +67,23 @@ function showDiff(wiki, revid) {
             $('#categories').append('<label for="good">Good</label><br>');
 
             $('#categories').append('<button type="submit" id="submit">Submit</button>');
+            // need to check if option selected
             $('#submit').on('click', function() {
-                categoriseDiff('https://leagueoflegends.fandom.com/', '2984657');
+                categoriseDiff(wiki, revid);
+                console.log("categorised");
+                var dbRef = db.ref('uncategorised/' + dataset + '/');
+                db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
+                    console.log('removed key: ' + Object.keys(snapshot.val())[0]);
+                    dbRef.child(Object.keys(snapshot.val())[0]).remove();
+                });
+                console.log(diffList.length);
+                diffList.shift();
+                console.log(diffList.length);
+                // dodgy recursion
+                wiki = diffList[0].split('wiki')[0];
+                revid = diffList[0].split('diff=').pop();
+                showDiff(wiki, revid);
             });
-
         } else {
             $('body').html('<div id="diff">Diff does not exist.</div>');
         }
@@ -66,9 +91,8 @@ function showDiff(wiki, revid) {
 }
 
 function categoriseDiff(wiki, revid) {
-    var newDiffKey = db.ref('/data/').push().key;
-    var dbRef = db.ref('/data/' + newDiffKey + '/');
-    console.log(newDiffKey);
+    var newDiffKey = db.ref('categorised/' + dataset + '/').push().key;
+    var dbRef = db.ref('categorised/' + dataset + '/' + newDiffKey + '/');
     dbRef.set({
         diff: wiki + 'wiki/?diff=' + revid,
         categories: {
@@ -78,25 +102,20 @@ function categoriseDiff(wiki, revid) {
             good: 0
         }
     })
-    //dbRef.set(diff: wiki + 'wiki/?diff=' + revid);
     var checked = $('input[name=options]:checked');
     checked.each(function() {
         dbRef.child('categories/' + this.id).set(1);
-        console.log('categories/' + this.id);
     });
 }
 
 function init() {
-    /*
-    firebase.auth().onAuthStateChanged(function(user) {
-        if (user) {
-            showDiff('https://leagueoflegends.fandom.com/', '2984657');
-        }
-    });*/
     $('#login').on('click', function() {
         login($('#password').val());
         $('#password').val("");
+        console.log($('#dataset option:selected').val());
+        dataset = $('#dataset option:selected').val();
     });
+
 }
 
 $(function() {
@@ -104,3 +123,4 @@ $(function() {
 });
 //showDiff('https://ff14-light.fandom.com/de/', '12925');
 //'https://leagueoflegends.fandom.com/wiki/?diff=2984657'
+//showDiff('https://leagueoflegends.fandom.com', '2984657');
