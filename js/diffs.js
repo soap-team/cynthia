@@ -54,7 +54,10 @@ function showDiff(wiki, revid) {
             $('#categories').append('<input type="checkbox" id="good" name="options">');
             $('#categories').append('<label for="good">Good</label><br>');
 
-            $('#categories').append('<button type="submit" id="submit" onClick="categoriseDiff()">Submit</button>');
+            $('#categories').append('<button type="submit" id="submit">Submit</button>');
+            $('#submit').on('click', function() {
+                categoriseDiff('https://leagueoflegends.fandom.com/', '2984657');
+            });
 
         } else {
             $('body').html('<div id="diff">Diff does not exist.</div>');
@@ -62,10 +65,24 @@ function showDiff(wiki, revid) {
    });
 }
 
-function categoriseDiff() {
+function categoriseDiff(wiki, revid) {
+    var newDiffKey = db.ref('/data/').push().key;
+    var dbRef = db.ref('/data/' + newDiffKey + '/');
+    console.log(newDiffKey);
+    dbRef.set({
+        diff: wiki + 'wiki/?diff=' + revid,
+        categories: {
+            damaging: 0,
+            spam: 0,
+            goodfaith: 0,
+            good: 0
+        }
+    })
+    //dbRef.set(diff: wiki + 'wiki/?diff=' + revid);
     var checked = $('input[name=options]:checked');
     checked.each(function() {
-        console.log(this.id);
+        dbRef.child('categories/' + this.id).set(1);
+        console.log('categories/' + this.id);
     });
 }
 
