@@ -1,0 +1,44 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>cynthia</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/firebasejs/4.8.0/firebase.js"></script>
+    <script type="text/javascript" src="js/diffs.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+    <div id="dataset-select">
+        <select id="dataset">
+            <option value="en">en</option>
+        </select>
+    </div>
+    <div id="login-form">
+        <input type="password" id="password"/>
+        <button type="submit" id="login">Login</button>
+    </div>
+    <div id="diff">
+        <table id="table"></table>
+    </div>
+    <div id="categories">
+        <input type="checkbox" id="damaging" name="options">
+        <label for="damaging">Damaging</label><br>
+
+        <input type="checkbox" id="spam" name="options">
+        <label for="spam">Spam</label><br>
+
+        <input type="checkbox" id="goodfaith" name="options">
+        <label for="goodfaith">Goodfaith</label><br>
+
+        <input type="checkbox" id="good" name="options">
+        <label for="good">Good</label><br>
+
+        <button type="submit" id="submit">Submit</button>
+    </div>
+</body>
+</html>
