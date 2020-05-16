@@ -15,7 +15,6 @@ var diffList = [];
 
 /**
  * Login via Firebase to enable write access
- * @param  type the type of login as a string
  * @param  password the password for the Firebase user
  */
 function login(password) {
@@ -23,13 +22,14 @@ function login(password) {
     firebase.auth().signInWithEmailAndPassword('noreply@fandom.com', password).then(function() {
         console.log('logged in');
         $('#login-form').hide();
+        getDatasetList();
+        $('#dataset').show();
         db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
             snapshot.val().forEach(function(e) {
                 diffList.push(e);
-            })
+            });
             var wiki = diffList[0].split('wiki')[0];
             var revid = diffList[0].split('diff=').pop();
-            console.log('l wiki and revid ' + wiki + revid);
             showDiff(wiki, revid);
         });
     }).catch(function(error) {
@@ -40,12 +40,13 @@ function login(password) {
 // Log out of Firebase
 function logout() {
     firebase.auth().signOut().then(function(d) {
-        console.log("logged out");
+        console.log('logged out');
     }).catch(function(error) {
         $('body').append('Error: ' + error.message);
     });
 }
 
+// Displays the diff
 function showDiff(wiki, revid) {
     $('#diff').empty().append("Loading diff...");
     $.get('https://cors-anywhere.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid + '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
@@ -59,8 +60,8 @@ function showDiff(wiki, revid) {
    });
 }
 
+// Categories the diff
 function categoriseDiff(wiki, revid) {
-    console.log('c wiki and revid ' + wiki + revid);
     var newDiffKey = db.ref('categorised/' + dataset + '/').push().key;
     var dbRef = db.ref('categorised/' + dataset + '/' + newDiffKey + '/');
     dbRef.set({
@@ -78,7 +79,17 @@ function categoriseDiff(wiki, revid) {
     });
 }
 
+function getDatasetList() {
+    db.ref('uncategorised/').once('value').then(function(snapshot) {
+        $('#dataset').empty();
+        Object.keys(snapshot.val()).forEach(function(e) {
+            $('#dataset').append('<option value="' + e + '">' + e + '</option>');
+        });
+    });
+}
+
 function init() {
+    $('#dataset').hide()
     $('#categories').hide();
     $('#login').on('click', function() {
         login($('#password').val());
@@ -91,20 +102,36 @@ function init() {
         var wiki = diffList[0].split('wiki')[0];
         var revid = diffList[0].split('diff=').pop();
         categoriseDiff(wiki, revid);
-        console.log("categorised");
         var dbRef = db.ref('uncategorised/' + dataset + '/');
         db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
             console.log('removed key: ' + Object.keys(snapshot.val())[0]);
             dbRef.child(Object.keys(snapshot.val())[0]).remove();
         });
-        console.log(diffList[0]);
         diffList.shift();
-        console.log(diffList[0]);
         
         $("#damaging").prop("checked", false);
         $("#spam").prop("checked", false);
         $("#goodfaith").prop("checked", false);
         $("#good").prop("checked", false);
+        showDiff(wiki, revid);
+    });
+
+    $('#dataset').change(function() {
+        dataset = $('#dataset option:selected').val();
+        $("#damaging").prop("checked", false);
+        $("#spam").prop("checked", false);
+        $("#goodfaith").prop("checked", false);
+        $("#good").prop("checked", false);
+        console.log(dataset);
+        db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
+            diffList.length = 0;
+            console.log(snapshot.val());
+            snapshot.val().forEach(function(e) {
+                diffList.push(e);
+            });
+        });
+        var wiki = diffList[0].split('wiki')[0];
+        var revid = diffList[0].split('diff=').pop();
         showDiff(wiki, revid);
     });
 
