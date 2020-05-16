@@ -11,7 +11,8 @@ firebase.initializeApp(config);
 var db = firebase.database();
 
 var dataset = '';
-var diffList = [];
+var diffLink = '';
+//var diffList = [];
 
 /**
  * Login via Firebase to enable write access
@@ -25,12 +26,18 @@ function login(password) {
         getDatasetList();
         $('#dataset').show();
         db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
-            snapshot.val().forEach(function(e) {
-                diffList.push(e);
-            });
+            snapshot.forEach(function(e) {
+                //console.log(e.val());
+                diffLink = e.val();
+                var wiki = diffLink.split('wiki')[0];
+                var revid = diffLink.split('diff=').pop();
+                showDiff(wiki, revid);
+                return true;
+                //diffList.push(e);
+            });/*
             var wiki = diffList[0].split('wiki')[0];
             var revid = diffList[0].split('diff=').pop();
-            showDiff(wiki, revid);
+            */            
         });
     }).catch(function(error) {
         $('body').append('Error: ' + error.message);
@@ -52,6 +59,7 @@ function showDiff(wiki, revid) {
     $.get('https://cors-anywhere.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid + '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
         if (d.query.pages != null) {
             $('#diff').empty().append('<table id="table"></table>');
+            console.log('showing ' + wiki + revid);
             $('#table').empty().append(d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff['*']);
             $('#categories').show();
         } else {
@@ -77,6 +85,29 @@ function categoriseDiff(wiki, revid) {
     checked.each(function() {
         dbRef.child('categories/' + this.id).set(1);
     });
+
+    dbRef = db.ref('uncategorised/' + dataset + '/');
+    db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
+        console.log('removed ' + wiki + revid);
+        console.log('removed key: ' + Object.keys(snapshot.val())[0]);
+        dbRef.child(Object.keys(snapshot.val())[0]).remove();
+
+        db.ref('uncategorised/' + dataset + '/').once('value').then(function(s) {
+            s.forEach(function(e) {
+                //console.log(e.val());
+                diffLink = e.val();
+                wiki = diffLink.split('wiki')[0];
+                revid = diffLink.split('diff=').pop();
+                showDiff(wiki, revid);
+                return true;
+                //diffList.push(e);
+            });/*
+            var wiki = diffList[0].split('wiki')[0];
+            var revid = diffList[0].split('diff=').pop();
+            */            
+        });
+    });
+    //diffList.shift();
 }
 
 function getDatasetList() {
@@ -99,40 +130,37 @@ function init() {
     });
     // need to check if option selected
     $('#submit').on('click', function() {
-        var wiki = diffList[0].split('wiki')[0];
-        var revid = diffList[0].split('diff=').pop();
-        categoriseDiff(wiki, revid);
-        var dbRef = db.ref('uncategorised/' + dataset + '/');
-        db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
-            console.log('removed key: ' + Object.keys(snapshot.val())[0]);
-            dbRef.child(Object.keys(snapshot.val())[0]).remove();
-        });
-        diffList.shift();
-        
         $("#damaging").prop("checked", false);
         $("#spam").prop("checked", false);
         $("#goodfaith").prop("checked", false);
         $("#good").prop("checked", false);
-        showDiff(wiki, revid);
+
+        var wiki = diffLink.split('wiki')[0];
+        var revid = diffLink.split('diff=').pop();
+        categoriseDiff(wiki, revid);
     });
 
     $('#dataset').change(function() {
         dataset = $('#dataset option:selected').val();
+        console.log(dataset);
         $("#damaging").prop("checked", false);
         $("#spam").prop("checked", false);
         $("#goodfaith").prop("checked", false);
         $("#good").prop("checked", false);
-        console.log(dataset);
-        db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
-            diffList.length = 0;
-            console.log(snapshot.val());
-            snapshot.val().forEach(function(e) {
-                diffList.push(e);
+        db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {      
+            snapshot.forEach(function(e) {
+                //diffList.push(e);
+                diffLink = e.val();
+                var wiki = diffLink.split('wiki')[0];
+                var revid = diffLink.split('diff=').pop();
+                showDiff(wiki, revid);
+                return true;
             });
+            /*
+            var wiki = diffList[0].split('wiki')[0];
+            var revid = diffList[0].split('diff=').pop();
+            */
         });
-        var wiki = diffList[0].split('wiki')[0];
-        var revid = diffList[0].split('diff=').pop();
-        showDiff(wiki, revid);
     });
 
 }
@@ -141,5 +169,5 @@ $(function() {
     init();
 });
 //showDiff('https://ff14-light.fandom.com/de/', '12925');
-//'https://leagueoflegends.fandom.com/wiki/?diff=2984657'
+//https://leagueoflegends.fandom.com/wiki/?diff=2984657
 //showDiff('https://leagueoflegends.fandom.com', '2984657');
