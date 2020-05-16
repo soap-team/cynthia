@@ -10,7 +10,7 @@ var config = {
 firebase.initializeApp(config);
 var db = firebase.database();
 
-var dataset = '';
+var dataset = 'en';
 var diffLink = '';
 //var diffList = [];
 
@@ -25,6 +25,7 @@ function login(password) {
         $('#login-form').hide();
         getDatasetList();
         $('#dataset').show();
+        $('#diff').show();
         db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
             snapshot.forEach(function(e) {
                 //console.log(e.val());
@@ -51,6 +52,10 @@ function logout() {
     }).catch(function(error) {
         $('body').append('Error: ' + error.message);
     });
+}
+
+function isLoggedIn() {
+    return firebase.auth().currentUser != null ? true : false;
 }
 
 // Displays the diff
@@ -120,8 +125,33 @@ function getDatasetList() {
 }
 
 function init() {
-    $('#dataset').hide()
-    $('#categories').hide();
+    firebase.auth().onAuthStateChanged(function(user) {
+        console.log(isLoggedIn());
+        if (user) {
+            $('#login-form').hide();
+            getDatasetList();
+            $('#dataset').show();
+            db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
+                snapshot.forEach(function(e) {
+                    //console.log(e.val());
+                    diffLink = e.val();
+                    var wiki = diffLink.split('wiki')[0];
+                    var revid = diffLink.split('diff=').pop();
+                    showDiff(wiki, revid);
+                    return true;
+                    //diffList.push(e);
+                });/*
+                var wiki = diffList[0].split('wiki')[0];
+                var revid = diffList[0].split('diff=').pop();
+                */            
+            });
+        } else {
+            $('#login-form').show();
+            $('#dataset').hide()
+            $('#categories').hide();
+            $('#diff').hide();
+        }
+    });
     $('#login').on('click', function() {
         login($('#password').val());
         $('#password').val("");
