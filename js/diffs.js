@@ -22,6 +22,7 @@ function login(password) {
     $('#diff').empty().append("Loading diff...");
     firebase.auth().signInWithEmailAndPassword('noreply@fandom.com', password).then(function() {
         console.log('logged in');
+        /*
         $('#login-form').hide();
         getDatasetList();
         $('#dataset').show();
@@ -35,11 +36,12 @@ function login(password) {
                 showDiff(wiki, revid);
                 return true;
                 //diffList.push(e);
-            });/*
+            });
             var wiki = diffList[0].split('wiki')[0];
             var revid = diffList[0].split('diff=').pop();
-            */            
+                     
         });
+        */
     }).catch(function(error) {
         $('body').append('Error: ' + error.message);
     });
@@ -64,6 +66,8 @@ function showDiff(wiki, revid) {
     $.get('https://cors-anywhere.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid + '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
         if (d.query.pages != null) {
             $('#diff').empty().append('<table id="table"></table>');
+            $('#diff-display').show();
+            $('#dataset-select').hide();
             console.log('showing ' + wiki + revid);
             $('#table').empty().append(d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff['*']);
             $('#categories').show();
@@ -119,7 +123,8 @@ function getDatasetList() {
     db.ref('uncategorised/').once('value').then(function(snapshot) {
         $('#dataset').empty();
         Object.keys(snapshot.val()).forEach(function(e) {
-            $('#dataset').append('<option value="' + e + '">' + e + '</option>');
+            $('#dataset').append('<button class="dataset-buttons" data-id="' + e + '">' + e + '</button><br>');
+            //$('#dataset').append('<option value="' + e + '">' + e + '</option>');
         });
     });
 }
@@ -129,27 +134,13 @@ function init() {
         console.log(isLoggedIn());
         if (user) {
             $('#login-form').hide();
+            $('#diff-display').hide();
             getDatasetList();
-            $('#dataset').show();
-            db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
-                snapshot.forEach(function(e) {
-                    //console.log(e.val());
-                    diffLink = e.val();
-                    var wiki = diffLink.split('wiki')[0];
-                    var revid = diffLink.split('diff=').pop();
-                    showDiff(wiki, revid);
-                    return true;
-                    //diffList.push(e);
-                });/*
-                var wiki = diffList[0].split('wiki')[0];
-                var revid = diffList[0].split('diff=').pop();
-                */            
-            });
+            $('#dataset-select').show();
         } else {
             $('#login-form').show();
-            $('#dataset').hide()
-            $('#categories').hide();
-            $('#diff').hide();
+            $('#dataset-select').hide();
+            $('#diff-display').hide();
         }
     });
     $('#login-button').on('click', function() {
@@ -170,6 +161,25 @@ function init() {
         categoriseDiff(wiki, revid);
     });
 
+    $('#dataset').on('click', '.dataset-buttons', function() {
+        dataset = $(this).text();
+        console.log(dataset);
+        db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
+            snapshot.forEach(function(e) {
+                //console.log(e.val());
+                diffLink = e.val();
+                var wiki = diffLink.split('wiki')[0];
+                var revid = diffLink.split('diff=').pop();
+                showDiff(wiki, revid);
+                return true;
+                //diffList.push(e);
+            });/*
+            var wiki = diffList[0].split('wiki')[0];
+            var revid = diffList[0].split('diff=').pop();
+            */
+        });
+    });
+    /*
     $('#dataset').change(function() {
         dataset = $('#dataset option:selected').val();
         console.log(dataset);
@@ -186,20 +196,25 @@ function init() {
                 showDiff(wiki, revid);
                 return true;
             });
-            /*
+            
             var wiki = diffList[0].split('wiki')[0];
             var revid = diffList[0].split('diff=').pop();
-            */
+            
         });
+    });
+    */
+    $('#dataset-select-button').on('click', function() {
+        $('#diff-display').hide();
+        getDatasetList();
+        $('#dataset-select').show();
     });
 
     $('#login-form form').submit(function(e) {
         e.preventDefault();
-    })
+    });
     $('#categories form').submit(function(e) {
         e.preventDefault();
-    })
-
+    });
 }
 
 $(function() {
@@ -207,4 +222,4 @@ $(function() {
 });
 //showDiff('https://ff14-light.fandom.com/de/', '12925');
 //https://leagueoflegends.fandom.com/wiki/?diff=2984657
-//showDiff('https://leagueoflegends.fandom.com', '2984657');
+//showDiff('https://leagueoflegends.fandom.com/', '2984657');

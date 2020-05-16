@@ -14,9 +14,8 @@
 
 <body>
     <div id="dataset-select">
-        <select id="dataset">
-            <option value="en">en</option>
-        </select>
+        <h3>Select a dataset</h3>
+        <div id="dataset"></div>
     </div>
     <div id="login-form">
         <form action="" method="get">
@@ -24,25 +23,28 @@
             <button type="submit" id="login-button">Login</button>
         </form>
     </div>
-    <div id="categories">
-        <form action="" method="get">
-            <input type="checkbox" id="damaging" name="options">
-            <label for="damaging">Damaging</label>
+    <div id="diff-display">
+        <button id="dataset-select-button">Back to Dataset selection</button>
+        <div id="categories">
+            <form action="" method="get">
+                <input type="checkbox" id="damaging" name="options">
+                <label for="damaging">Damaging</label>
 
-            <input type="checkbox" id="spam" name="options">
-            <label for="spam">Spam</label>
+                <input type="checkbox" id="spam" name="options">
+                <label for="spam">Spam</label>
 
-            <input type="checkbox" id="goodfaith" name="options">
-            <label for="goodfaith">Goodfaith</label>
+                <input type="checkbox" id="goodfaith" name="options">
+                <label for="goodfaith">Goodfaith</label>
 
-            <input type="checkbox" id="good" name="options">
-            <label for="good">Good</label>
+                <input type="checkbox" id="good" name="options">
+                <label for="good">Good</label>
 
-            <button type="submit" id="submit">Submit</button>
-        </form>
-    </div>
-    <div id="diff">
-        <table id="table"></table>
+                <button type="submit" id="submit">Submit</button>
+            </form>
+        </div>
+        <div id="diff">
+            <table id="table"></table>
+        </div>
     </div>
 </body>
 </html>
