@@ -65,7 +65,10 @@ function showDiff(wiki, revid) {
     $('#diff').empty().append("Loading diff...");
     $.get('https://cors-anywhere.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid + '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
         if (d.query.pages != null) {
-            $('#diff').empty().append('<table id="table"></table>');
+            $('#diff').empty().append('<h3>' + d.query.pages[Object.keys(d.query.pages)[0]].title + '</h3>');
+            $('#diff').append('comment: ' + d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].comment + '<br>');
+            $('#diff').append('<a href="' + diffLink + '">' + diffLink + '</a>');
+            $('#diff').append('<table id="table"></table>');
             $('#diff-display').show();
             $('#dataset-select').hide();
             console.log('showing ' + wiki + revid);
@@ -150,7 +153,7 @@ function init() {
         dataset = $('#dataset option:selected').val();
     });
     // need to check if option selected
-    $('#submit').on('click', function() {
+    $('#next').on('click', function() {
         $("#damaging").prop("checked", false);
         $("#spam").prop("checked", false);
         $("#goodfaith").prop("checked", false);
@@ -220,6 +223,9 @@ function init() {
 $(function() {
     init();
 });
-//showDiff('https://ff14-light.fandom.com/de/', '12925');
-//https://leagueoflegends.fandom.com/wiki/?diff=2984657
-//showDiff('https://leagueoflegends.fandom.com/', '2984657');
+/*
+showDiff('https://ff14-light.fandom.com/de/', '12925');
+https://leagueoflegends.fandom.com/wiki/?diff=2984657
+showDiff('https://leagueoflegends.fandom.com/', '2984657');
+$.get('https://cors-anywhere.herokuapp.com/https://dontstarve.fandom.com/api.php?action=query&prop=revisions&revids=461184&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d){console.log(d)});
+*/
