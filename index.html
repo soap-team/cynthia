@@ -19,23 +19,27 @@
         </select>
     </div>
     <div id="login-form">
-        <input type="password" id="password"/>
-        <button type="submit" id="login">Login</button>
+        <form action="" method="get">
+            <input type="password" id="password"/>
+            <button type="submit" id="login-button">Login</button>
+        </form>
     </div>
     <div id="categories">
-        <input type="checkbox" id="damaging" name="options">
-        <label for="damaging">Damaging</label><br>
+        <form action="" method="get">
+            <input type="checkbox" id="damaging" name="options">
+            <label for="damaging">Damaging</label>
 
-        <input type="checkbox" id="spam" name="options">
-        <label for="spam">Spam</label><br>
+            <input type="checkbox" id="spam" name="options">
+            <label for="spam">Spam</label>
 
-        <input type="checkbox" id="goodfaith" name="options">
-        <label for="goodfaith">Goodfaith</label><br>
+            <input type="checkbox" id="goodfaith" name="options">
+            <label for="goodfaith">Goodfaith</label>
 
-        <input type="checkbox" id="good" name="options">
-        <label for="good">Good</label><br>
+            <input type="checkbox" id="good" name="options">
+            <label for="good">Good</label>
 
-        <button type="submit" id="submit">Submit</button>
+            <button type="submit" id="submit">Submit</button>
+        </form>
     </div>
     <div id="diff">
         <table id="table"></table>

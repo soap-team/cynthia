@@ -152,7 +152,7 @@ function init() {
             $('#diff').hide();
         }
     });
-    $('#login').on('click', function() {
+    $('#login-button').on('click', function() {
         login($('#password').val());
         $('#password').val("");
         console.log($('#dataset option:selected').val());
@@ -192,6 +192,13 @@ function init() {
             */
         });
     });
+
+    $('#login-form form').submit(function(e) {
+        e.preventDefault();
+    })
+    $('#categories form').submit(function(e) {
+        e.preventDefault();
+    })
 
 }
 
