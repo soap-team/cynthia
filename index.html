@@ -13,32 +13,36 @@
 </head>
 
 <body>
-    <div id="dataset-select">
-        <select id="dataset">
-            <option value="en">en</option>
-        </select>
+    <div id="dataset-select" style="display:none">
+        <h3>Select a dataset</h3>
+        <div id="dataset"></div>
     </div>
     <div id="login-form">
-        <input type="password" id="password"/>
-        <button type="submit" id="login">Login</button>
+        <form action="" method="get">
+            <input type="password" id="password"/>
+            <button type="submit" id="login-button">Login</button>
+        </form>
     </div>
-    <div id="diff">
-        <table id="table"></table>
-    </div>
-    <div id="categories">
-        <input type="checkbox" id="damaging" name="options">
-        <label for="damaging">Damaging</label><br>
+    <div id="diff-display" style="display:none">
+        <button id="dataset-select-button">Back to Dataset selection</button>
+        <div id="categories">
+            <form action="" method="get">
+                <input type="checkbox" id="damaging" name="options">
+                <label for="damaging">Damaging</label>
 
-        <input type="checkbox" id="spam" name="options">
-        <label for="spam">Spam</label><br>
+                <input type="checkbox" id="spam" name="options">
+                <label for="spam">Spam</label>
 
-        <input type="checkbox" id="goodfaith" name="options">
-        <label for="goodfaith">Goodfaith</label><br>
+                <input type="checkbox" id="goodfaith" name="options">
+                <label for="goodfaith">Goodfaith</label>
 
-        <input type="checkbox" id="good" name="options">
-        <label for="good">Good</label><br>
+                <input type="checkbox" id="good" name="options">
+                <label for="good">Good</label>
 
-        <button type="submit" id="submit">Submit</button>
+                <button type="submit" id="next">Next</button>
+            </form>
+        </div>
+        <div id="diff"></div>
     </div>
 </body>
 </html>
