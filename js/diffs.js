@@ -95,7 +95,7 @@ function categoriseDiff(wiki, revid) {
     })
     var checked = $('input[name=options]:checked');
     checked.each(function() {
-        dbRef.child('categories/' + this.id).set(1);
+        dbRef.child('categorised/' + dataset + '/' + this.id).set(1);
     });
 
     dbRef = db.ref('uncategorised/' + dataset + '/');
