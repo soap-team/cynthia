@@ -133,14 +133,14 @@ function init() {
         dataset = $('#dataset option:selected').val();
     });
     $('#next').on('click', function() {
+        var wiki = diffLink.split('wiki')[0];
+        var revid = diffLink.split('diff=').pop();
+        categoriseDiff(wiki, revid);
+        
         $("#damaging").prop("checked", false);
         $("#spam").prop("checked", false);
         $("#goodfaith").prop("checked", false);
         $("#good").prop("checked", false);
-
-        var wiki = diffLink.split('wiki')[0];
-        var revid = diffLink.split('diff=').pop();
-        categoriseDiff(wiki, revid);
     });
     $('#dataset').on('click', '.dataset-buttons', function() {
         dataset = $(this).text();
