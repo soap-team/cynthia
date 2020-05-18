@@ -111,7 +111,7 @@ function getDatasetList() {
     });
 }
 
-// Initialises the system
+// Initialises the app
 function init() {
     firebase.auth().onAuthStateChanged(function(user) {
         console.log(isLoggedIn());
