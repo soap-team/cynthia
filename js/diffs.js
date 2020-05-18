@@ -95,7 +95,7 @@ function categoriseDiff(wiki, revid) {
     })
     var checked = $('input[name=options]:checked');
     checked.each(function() {
-        dbRef.child('categorised/' + dataset + '/' + this.id).set(1);
+        dbRef.child('categories/' + this.id).set(1);
     });
 
     dbRef = db.ref('uncategorised/' + dataset + '/');
@@ -154,14 +154,14 @@ function init() {
     });
     // need to check if option selected
     $('#next').on('click', function() {
+        var wiki = diffLink.split('wiki')[0];
+        var revid = diffLink.split('diff=').pop();
+        categoriseDiff(wiki, revid);
+        
         $("#damaging").prop("checked", false);
         $("#spam").prop("checked", false);
         $("#goodfaith").prop("checked", false);
         $("#good").prop("checked", false);
-
-        var wiki = diffLink.split('wiki')[0];
-        var revid = diffLink.split('diff=').pop();
-        categoriseDiff(wiki, revid);
     });
 
     $('#dataset').on('click', '.dataset-buttons', function() {
