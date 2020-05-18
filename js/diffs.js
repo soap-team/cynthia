@@ -1,18 +1,18 @@
 // Initialize Firebase
-var config = {
-    apiKey: 'AIzaSyBTRD3nJ4ChBZQ4dS9mXwoq43Kc0mkj3rM',
-    authDomain: 'soap-cynthia.firebaseapp.com',
-    databaseURL: 'https://soap-cynthia.firebaseio.com',
-    projectId: 'soap-cynthia',
-    storageBucket: 'soap-cynthia.appspot.com',
-    messagingSenderId: '950952379277'
+var firebaseConfig = {
+    apiKey: "AIzaSyBTRD3nJ4ChBZQ4dS9mXwoq43Kc0mkj3rM",
+    authDomain: "soap-cynthia.firebaseapp.com",
+    databaseURL: "https://soap-cynthia.firebaseio.com",
+    projectId: "soap-cynthia",
+    storageBucket: "soap-cynthia.appspot.com",
+    messagingSenderId: "950952379277",
+    appId: "1:950952379277:web:10b086eebee1cd61b3f3c4"
 };
-firebase.initializeApp(config);
+firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
 var dataset = 'en';
 var diffLink = '';
-//var diffList = [];
 
 /**
  * Login via Firebase to enable write access
@@ -22,26 +22,6 @@ function login(password) {
     $('#diff-container').empty().append("Loading diff...");
     firebase.auth().signInWithEmailAndPassword('noreply@fandom.com', password).then(function() {
         console.log('logged in');
-        /*
-        $('#login-form').hide();
-        getDatasetList();
-        $('#dataset').show();
-        $('#diff-container').show();
-        db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
-            snapshot.forEach(function(e) {
-                //console.log(e.val());
-                diffLink = e.val();
-                var wiki = diffLink.split('wiki')[0];
-                var revid = diffLink.split('diff=').pop();
-                showDiff(wiki, revid);
-                return true;
-                //diffList.push(e);
-            });
-            var wiki = diffList[0].split('wiki')[0];
-            var revid = diffList[0].split('diff=').pop();
-                     
-        });
-        */
     }).catch(function(error) {
         $('body').append('Error: ' + error.message);
     });
@@ -56,6 +36,10 @@ function logout() {
     });
 }
 
+/**
+ * Checks if the user is logged in
+ * @return  true if logged in, false otherwise
+ */
 function isLoggedIn() {
     return firebase.auth().currentUser != null ? true : false;
 }
@@ -111,32 +95,28 @@ function categoriseDiff(wiki, revid) {
 
         db.ref('uncategorised/' + dataset + '/').once('value').then(function(s) {
             s.forEach(function(e) {
-                //console.log(e.val());
                 diffLink = e.val();
                 wiki = diffLink.split('wiki')[0];
                 revid = diffLink.split('diff=').pop();
                 showDiff(wiki, revid);
                 return true;
-                //diffList.push(e);
-            });/*
-            var wiki = diffList[0].split('wiki')[0];
-            var revid = diffList[0].split('diff=').pop();
-            */            
+            });         
         });
     });
-    //diffList.shift();
 }
 
+// Gets the names of each uncategorised dataset in the firebase database and 
+// adds buttons to the interface for each dataset
 function getDatasetList() {
     db.ref('uncategorised/').once('value').then(function(snapshot) {
         $('#dataset').empty();
         Object.keys(snapshot.val()).forEach(function(e) {
-            $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e + '">' + e + '</button>');
-            //$('#dataset').append('<option value="' + e + '">' + e + '</option>');
+            $('#dataset').append('<button class="dataset-buttons" data-id="' + e + '">' + e + '</button><br>');
         });
     });
 }
 
+// Initialises the app
 function init() {
     firebase.auth().onAuthStateChanged(function(user) {
         console.log(isLoggedIn());
@@ -157,7 +137,6 @@ function init() {
         console.log($('#dataset option:selected').val());
         dataset = $('#dataset option:selected').val();
     });
-    // need to check if option selected
     $('#next').on('click', function() {
         var wiki = diffLink.split('wiki')[0];
         var revid = diffLink.split('diff=').pop();
@@ -168,55 +147,24 @@ function init() {
         $("#goodfaith").prop("checked", false);
         $("#good").prop("checked", false);
     });
-
     $('#dataset').on('click', '.dataset-buttons', function() {
         dataset = $(this).text();
         console.log(dataset);
         db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
             snapshot.forEach(function(e) {
-                //console.log(e.val());
-                diffLink = e.val();
-                var wiki = diffLink.split('wiki')[0];
-                var revid = diffLink.split('diff=').pop();
-                showDiff(wiki, revid);
-                return true;
-                //diffList.push(e);
-            });/*
-            var wiki = diffList[0].split('wiki')[0];
-            var revid = diffList[0].split('diff=').pop();
-            */
-        });
-    });
-    /*
-    $('#dataset').change(function() {
-        dataset = $('#dataset option:selected').val();
-        console.log(dataset);
-        $("#damaging").prop("checked", false);
-        $("#spam").prop("checked", false);
-        $("#goodfaith").prop("checked", false);
-        $("#good").prop("checked", false);
-        db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {      
-            snapshot.forEach(function(e) {
-                //diffList.push(e);
                 diffLink = e.val();
                 var wiki = diffLink.split('wiki')[0];
                 var revid = diffLink.split('diff=').pop();
                 showDiff(wiki, revid);
                 return true;
             });
-            
-            var wiki = diffList[0].split('wiki')[0];
-            var revid = diffList[0].split('diff=').pop();
-            
         });
     });
-    */
     $('#dataset-select-button').on('click', function() {
         $('#diff-display').hide();
         getDatasetList();
         $('#dataset-select').show();
     });
-
     $('#login-form form').submit(function(e) {
         e.preventDefault();
     });
@@ -241,6 +189,7 @@ function init() {
     });
 }
 
+// Runs the initialisation
 $(function() {
     init();
 });
