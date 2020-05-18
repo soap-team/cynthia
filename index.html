@@ -3,8 +3,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-
-    <title>cynthia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cynthia: diff labelling interface</title>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/firebasejs/4.8.0/firebase.js"></script>
     <script type="text/javascript" src="js/diffs.js"></script>
@@ -13,11 +13,15 @@
 </head>
 
 <body>
+    <h1>Cynthia: diff labelling interface</h1>
     <div id="dataset-select" style="display:none">
+        <p>This web app allows you to help the SOAP team (VSTF/GRASP) by <strong>labelling and categorising diffs</strong>. Labelled data will be used to develop, train and improve our detection tools.</p>
         <h3>Select a dataset</h3>
         <div id="dataset"></div>
     </div>
     <div id="login-form">
+        <p>This web app allows you to help the SOAP team (VSTF/GRASP) by <strong>labelling and categorising diffs</strong>. Labelled data will be used to develop, train and improve our detection tools.</p>
+        <p>In order to start helping, you must have over 20 reports to the SOAP team, and you will need to obtain a password from Noreplyz.</p>
         <form action="" method="get">
             <input type="password" id="password"/>
             <button type="submit" id="login-button">Login</button>
@@ -42,7 +46,7 @@
                 <button type="submit" id="next">Next</button>
             </form>
         </div>
-        <div id="diff"></div>
+        <div id="diff-container"></div>
     </div>
 </body>
 </html>

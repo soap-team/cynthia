@@ -19,14 +19,14 @@ var diffLink = '';
  * @param  password the password for the Firebase user
  */
 function login(password) {
-    $('#diff').empty().append("Loading diff...");
+    $('#diff-container').empty().append("Loading diff...");
     firebase.auth().signInWithEmailAndPassword('noreply@fandom.com', password).then(function() {
         console.log('logged in');
         /*
         $('#login-form').hide();
         getDatasetList();
         $('#dataset').show();
-        $('#diff').show();
+        $('#diff-container').show();
         db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
             snapshot.forEach(function(e) {
                 //console.log(e.val());
@@ -62,17 +62,22 @@ function isLoggedIn() {
 
 // Displays the diff
 function showDiff(wiki, revid) {
-    $('#diff').empty().append("Loading diff...");
+    $('#diff-container').empty().append("Loading diff...");
     $.get('https://cors-anywhere.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid + '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
         if (d.query.pages != null) {
-            $('#diff').empty().append('<h3>' + d.query.pages[Object.keys(d.query.pages)[0]].title + '</h3>');
-            $('#diff').append('comment: ' + d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].comment + '<br>');
-            $('#diff').append('<a href="' + diffLink + '">' + diffLink + '</a>');
-            $('#diff').append('<table id="table"></table>');
+            $('#diff-container').empty().append('<h3>' + d.query.pages[Object.keys(d.query.pages)[0]].title + '</h3>');
+            $('#diff-container').append('comment: ' + d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].comment + '<br>');
+            $('#diff-container').append('<a href="' + diffLink + '">' + diffLink + '</a>');
+            $('#diff-container').append('<table id="diff" class="diff"><tbody></tbody></table>');
+            $('#diff').prepend('<colgroup><col class="diff-marker"> \
+				<col class="diff-content"> \
+				<col class="diff-marker"> \
+				<col class="diff-content"> \
+				</colgroup>');
             $('#diff-display').show();
             $('#dataset-select').hide();
             console.log('showing ' + wiki + revid);
-            $('#table').empty().append(d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff['*']);
+            $('#diff tbody').empty().append(d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff['*']);
             $('#categories').show();
         } else {
             $('body').html('<div>Diff does not exist.</div>');
@@ -126,7 +131,7 @@ function getDatasetList() {
     db.ref('uncategorised/').once('value').then(function(snapshot) {
         $('#dataset').empty();
         Object.keys(snapshot.val()).forEach(function(e) {
-            $('#dataset').append('<button class="dataset-buttons" data-id="' + e + '">' + e + '</button><br>');
+            $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e + '">' + e + '</button>');
             //$('#dataset').append('<option value="' + e + '">' + e + '</option>');
         });
     });
