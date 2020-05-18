@@ -123,3 +123,193 @@ td.diff-deletedline .diffchange {
     direction: ltr !important;
     unicode-bidi: embed
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;700&display=swap');
+
+:root {
+    font-family: Rubik, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --width-max-large: 1080px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+p {
+    line-height: 160%;
+}
+
+/* Fandom button */
+button {
+    color: #0e191a;
+    background-color: #DDD;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: Rubik, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .15px;
+    line-height: 16px;
+    margin: 0;
+    outline: 0;
+    padding: 7px 18px;
+    text-decoration: none;
+    transition-duration: .3s;
+    transition-property: background-color, border-color, color;
+    vertical-align: top;
+    -webkit-appearance: none;
+}
+
+button:hover {
+    background-color: #BBB;
+    border-color: #BBB;
+}
+
+/* Checkbox */
+
+input[type="checkbox"] {
+    --active: #088488;
+    --active-inner: #fff;
+    --border: #bbc1e1;
+    --background: #fff;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    height: 24px;
+    width: 24px;
+    border-radius: 3px;
+    vertical-align: -6px;
+    outline: none;
+    display: inline-block;
+    position: relative;
+    margin: 0;
+    cursor: pointer;
+    border: 1px solid var(--bc, var(--border));
+    background: var(--b, var(--background));
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.2s;
+}
+
+input[type="checkbox"]+label {
+    --active: #005252;
+    --active-inner: #fff;
+    --background: #EEE;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border-radius: 3px;
+    color: var(--c, #000);
+    background: var(--b, var(--background));
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.2s;
+    margin-left: -40px;
+    padding: 8px 16px 8px 44px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    cursor: pointer;
+}
+
+input[type="checkbox"]:after {
+    content: "";
+    display: block;
+    left: 0;
+    top: 50%;
+    position: absolute;
+    -webkit-transition: opacity var(--d-o, 0.2s), -webkit-transform var(--d-t, 0.3s) var(--d-t-e, ease);
+    transition: opacity var(--d-o, 0.2s), -webkit-transform var(--d-t, 0.3s) var(--d-t-e, ease);
+    transition: transform var(--d-t, 0.3s) var(--d-t-e, ease), opacity var(--d-o, 0.2s);
+    transition: transform var(--d-t, 0.3s) var(--d-t-e, ease), opacity var(--d-o, 0.2s), -webkit-transform var(--d-t, 0.3s) var(--d-t-e, ease);
+}
+
+input[type="checkbox"]:checked,
+input[type="checkbox"]:checked+label {
+    --b: var(--active);
+    --c: #FFF;
+}
+
+input[type="checkbox"]:after {
+    width: 5px;
+    height: 9px;
+    border: 2px solid var(--active-inner);
+    border-top: 0;
+    border-left: 0;
+    left: 7px;
+    top: 4px;
+    transform: rotate(43deg);
+}
+
+body {
+    margin: 0 auto;
+    max-width: var(--width-max-large);
+}
+
+/* Tiles */
+.tile {
+    border-radius: 0;
+    margin-bottom: 8px;
+    text-align: left;
+    width: 100%;
+}
+
+/* Categories */
+#categories {
+    background: #EEE;
+    margin: 12px 0;
+    padding: 16px;
+    line-height: 32px;
+    vertical-align: middle;
+}
+
+.category,
+#category-help {
+    display: inline-block;
+    margin-left: 12px;
+    position: relative;
+}
+
+#next {
+    float: right;
+}
+
+/* Tooltips */
+.tooltip {
+    background: #333;
+    border-radius: 2px;
+    bottom: 0;
+    color: #FFF;
+    font-size: 13px;
+    line-height: 150%;
+    left: 50%;
+    margin-top: 10px;
+    opacity: 0;
+    padding: 6px 10px;
+    transition: opacity 0.2s cubic-bezier(0.64, 0.09, 0.08, 1), transform 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
+    visibility: hidden;
+    -webkit-transform: translateX(-50%) translateY(120%);
+    transform: translateX(-50%) translateY(120%);
+    white-space: nowrap;
+    z-index: 2;
+    position: absolute;
+}
+
+.tooltip.left {
+    -webkit-transform: translateX(0%) translateY(120%);
+    transform: translateX(0%) translateY(120%);
+    left: 0;
+}
+
+.tooltip.right {
+    -webkit-transform: translateX(0%) translateY(120%);
+    transform: translateX(10%) translateY(20%);
+    left: 100%;
+}
+
+.tooltip.top {
+    -webkit-transform: translateX(-50%) translateY(-100%);
+    transform: translateX(-50%) translateY(-100%);
+}
+
+*:hover>.tooltip {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+}

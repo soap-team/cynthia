@@ -69,11 +69,11 @@ function showDiff(wiki, revid) {
             $('#diff-container').append('comment: ' + d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].comment + '<br>');
             $('#diff-container').append('<a href="' + diffLink + '">' + diffLink + '</a>');
             $('#diff-container').append('<table id="diff" class="diff"><tbody></tbody></table>');
-            $('#diff').prepend('<colgroup><col class="diff-marker"> \
-				<col class="diff-content"> \
-				<col class="diff-marker"> \
-				<col class="diff-content"> \
-				</colgroup>');
+            $('#diff').prepend('<colgroup><col class="diff-marker">' +
+                '<col class="diff-content">' +
+                '<col class="diff-marker">' +
+                '<col class="diff-content">' +
+                '</colgroup>');
             $('#diff-display').show();
             $('#dataset-select').hide();
             console.log('showing ' + wiki + revid);
