@@ -223,6 +223,22 @@ function init() {
     $('#categories form').submit(function(e) {
         e.preventDefault();
     });
+
+    // Keyboard shortcuts
+    $(document).keypress(function (e) {
+        if (e.charCode == 100) { // d
+            $('#damaging').prop('checked', !$('#damaging').prop('checked'));
+        }
+        else if (e.charCode == 115) { // s
+            $('#spam').prop('checked', !$('#spam').prop('checked'));
+        }
+        else if (e.charCode == 103) { // g
+            $('#goodfaith').prop('checked', !$('#goodfaith').prop('checked'));
+        }
+        else if (e.charCode == 110) {
+            $('#next').click();
+        }
+    });
 }
 
 $(function() {
