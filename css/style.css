@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;700&display=swap');
 table.diff {
     border: none;
     border-spacing: 4px;
@@ -124,8 +125,6 @@ td.diff-deletedline .diffchange {
     unicode-bidi: embed
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;700&display=swap');
-
 :root {
     font-family: Rubik, "Helvetica Neue", Helvetica, Arial, sans-serif;
     --width-max-large: 1080px;
@@ -170,7 +169,7 @@ button:hover {
 /* Checkbox */
 
 input[type="checkbox"] {
-    --active: #088488;
+    --active: #1a5eb8;
     --active-inner: #fff;
     --border: #bbc1e1;
     --background: #fff;
@@ -191,7 +190,7 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]+label {
-    --active: #005252;
+    --active: #14478b;
     --active-inner: #fff;
     --background: #EEE;
     -webkit-appearance: none;
@@ -239,6 +238,7 @@ input[type="checkbox"]:after {
 
 body {
     margin: 0 auto;
+    padding: 0 10px;
     max-width: var(--width-max-large);
 }
 
@@ -267,6 +267,8 @@ body {
 }
 
 #next {
+    background: #1a5eb8;
+    color: #FFF;
     float: right;
 }
 
