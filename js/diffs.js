@@ -51,7 +51,7 @@ function showDiff(wiki, revid) {
         if (d.query.pages != null) {
             $('#diff-container').empty().append('<h3>' + d.query.pages[Object.keys(d.query.pages)[0]].title + '</h3>');
             $('#diff-container').append('comment: ' + d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].comment + '<br>');
-            $('#diff-container').append('<a href="' + diffLink + '">' + diffLink + '</a>');
+            $('#diff-container').append('<a href="' + diffLink + '" target="_blank">' + diffLink + '</a>');
             $('#diff-container').append('<table id="diff" class="diff"><tbody></tbody></table>');
             $('#diff').prepend('<colgroup><col class="diff-marker">' +
                 '<col class="diff-content">' +
