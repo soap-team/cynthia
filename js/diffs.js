@@ -111,7 +111,7 @@ function getDatasetList() {
     db.ref('uncategorised/').once('value').then(function(snapshot) {
         $('#dataset').empty();
         Object.keys(snapshot.val()).forEach(function(e) {
-            $('#dataset').append('<button class="dataset-buttons" data-id="' + e + '">' + e + '</button><br>');
+            $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e + '">' + e + '</button>');
         });
     });
 }
