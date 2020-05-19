@@ -13,6 +13,7 @@ var db = firebase.database();
 
 var dataset = '';
 var diffLink = '';
+var workset = '';
 
 /**
  * Login via Firebase to enable write access
@@ -80,16 +81,15 @@ function categoriseDiff(wiki, revid) {
     var dbRef = db.ref('categorised/' + dataset + '/' + newDiffKey + '/');
     dbRef.set({
         diff: wiki + 'wiki/?diff=' + revid,
-        categories: {
+        labels: {
             damaging: 0,
             spam: 0,
-            goodfaith: 0,
-            good: 0
+            goodfaith: 0
         }
     })
     var checked = $('input[name=options]:checked');
     checked.each(function() {
-        dbRef.child('categories/' + this.id).set(1);
+        dbRef.child('labels/' + this.id).set(1);
     });
 
     deleteFirstDiff();
@@ -98,7 +98,7 @@ function categoriseDiff(wiki, revid) {
 // Gets the next diff in the workset and shows it
 function getNextDiff() {
     console.log('getting next diff');
-    db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
+    db.ref('uncategorised/' + dataset + '/' + workset + '/').once('value').then(function(snapshot) {
         snapshot.forEach(function(e) {
             diffLink = e.val();
             var wiki = diffLink.split('wiki')[0];
@@ -111,7 +111,7 @@ function getNextDiff() {
 
 // Deletes the first key in the workset and gets the next one
 function deleteFirstDiff() {
-    dbRef = db.ref('uncategorised/' + dataset + '/');
+    dbRef = db.ref('uncategorised/' + dataset + '/' + workset + '/');
     dbRef.once('value').then(function(snapshot) {
         console.log('removed key: ' + Object.keys(snapshot.val())[0]);
         dbRef.child(Object.keys(snapshot.val())[0]).remove();
@@ -122,10 +122,30 @@ function deleteFirstDiff() {
 // Gets the names of each uncategorised dataset in the firebase database and 
 // adds buttons to the interface for each dataset
 function getDatasetList() {
-    db.ref('uncategorised/').once('value').then(function(snapshot) {
+    db.ref('datasets/').once('value').then(function(snapshot) {
         $('#dataset').empty();
-        Object.keys(snapshot.val()).forEach(function(e) {
-            $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e + '">' + e + '</button>');
+        snapshot.forEach(function(e) {
+            $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e.key + '">' + e.key + '</button>');
+        });
+    });
+}
+
+// Assigns the first available workset in the dataset to the user
+function assignWorkset() {
+    dbRef = db.ref('datasets/' + dataset + '/')
+    dbRef.once('value').then(function(snapshot) {
+        snapshot.forEach(function(e) {
+            storedTime = e.val();
+            currTime = new Date();
+            timeDiff = currTime - new Date(storedTime);
+            console.log(timeDiff / 1000 / 60 / 60 + " hours");
+            if (timeDiff > 2) {
+                workset = e.key;
+                dbRef.child(e.key).set(currTime.toISOString());
+                console.log(dataset + '/' + workset + ' timestamp updated ' + currTime.toISOString());
+                getNextDiff();
+                return true;
+            }
         });
     });
 }
@@ -164,7 +184,7 @@ function init() {
     $('#dataset').on('click', '.dataset-buttons', function() {
         dataset = $(this).text();
         console.log(dataset);
-        getNextDiff();
+        assignWorkset();
     });
     $('#dataset-select-button').on('click', function() {
         $('#diff-display').hide();
