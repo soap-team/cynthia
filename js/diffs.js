@@ -11,7 +11,7 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
-var dataset = 'en';
+var dataset = '';
 var diffLink = '';
 
 /**
@@ -47,10 +47,11 @@ function isLoggedIn() {
 // Displays the diff
 function showDiff(wiki, revid) {
     $('#diff-container').empty().append("Loading diff...");
-    $.get('https://cors-anywhere.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid + '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
+    $.get('https://cors-anywhere.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid + 
+            '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
         if (d.query.pages != null) {
             $('#diff-container').empty().append('<h3>' + d.query.pages[Object.keys(d.query.pages)[0]].title + '</h3>');
-            $('#diff-container').append('comment: ' + d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].comment + '<br>');
+            $('#diff-container').append('comment: ' + d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].comment + '<br/>');
             $('#diff-container').append('<a href="' + diffLink + '" target="_blank">' + diffLink + '</a>');
             $('#diff-container').append('<table id="diff" class="diff"><tbody></tbody></table>');
             $('#diff').prepend('<colgroup><col class="diff-marker">' +
@@ -64,8 +65,12 @@ function showDiff(wiki, revid) {
             $('#diff tbody').empty().append(d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff['*']);
             $('#categories').show();
         } else {
-            $('body').html('<div>Diff does not exist.</div>');
+            console.log('skipping deleted diff, removed from db');
+            deleteFirstDiff();
         }
+   }).catch(function() {
+        console.log('skipping deleted wiki, removed from db');
+        deleteFirstDiff();
    });
 }
 
@@ -87,21 +92,30 @@ function categoriseDiff(wiki, revid) {
         dbRef.child('categories/' + this.id).set(1);
     });
 
-    dbRef = db.ref('uncategorised/' + dataset + '/');
+    deleteFirstDiff();
+}
+
+// Gets the next diff in the workset and shows it
+function getNextDiff() {
+    console.log('getting next diff');
     db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
-        console.log('removed ' + wiki + revid);
+        snapshot.forEach(function(e) {
+            diffLink = e.val();
+            var wiki = diffLink.split('wiki')[0];
+            var revid = diffLink.split('diff=').pop();
+            showDiff(wiki, revid);
+            return true;
+        });         
+    });
+}
+
+// Deletes the first key in the workset and gets the next one
+function deleteFirstDiff() {
+    dbRef = db.ref('uncategorised/' + dataset + '/');
+    dbRef.once('value').then(function(snapshot) {
         console.log('removed key: ' + Object.keys(snapshot.val())[0]);
         dbRef.child(Object.keys(snapshot.val())[0]).remove();
-
-        db.ref('uncategorised/' + dataset + '/').once('value').then(function(s) {
-            s.forEach(function(e) {
-                diffLink = e.val();
-                wiki = diffLink.split('wiki')[0];
-                revid = diffLink.split('diff=').pop();
-                showDiff(wiki, revid);
-                return true;
-            });         
-        });
+        getNextDiff();
     });
 }
 
@@ -150,15 +164,7 @@ function init() {
     $('#dataset').on('click', '.dataset-buttons', function() {
         dataset = $(this).text();
         console.log(dataset);
-        db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
-            snapshot.forEach(function(e) {
-                diffLink = e.val();
-                var wiki = diffLink.split('wiki')[0];
-                var revid = diffLink.split('diff=').pop();
-                showDiff(wiki, revid);
-                return true;
-            });
-        });
+        getNextDiff();
     });
     $('#dataset-select-button').on('click', function() {
         $('#diff-display').hide();
@@ -174,16 +180,16 @@ function init() {
 
     // Keyboard shortcuts
     $(document).keypress(function (e) {
-        if (e.charCode == 100) { // d
+        if (e.charCode === 100) { // d
             $('#damaging').prop('checked', !$('#damaging').prop('checked'));
         }
-        else if (e.charCode == 115) { // s
+        else if (e.charCode === 115) { // s
             $('#spam').prop('checked', !$('#spam').prop('checked'));
         }
-        else if (e.charCode == 103) { // g
+        else if (e.charCode === 103) { // g
             $('#goodfaith').prop('checked', !$('#goodfaith').prop('checked'));
         }
-        else if (e.charCode == 110) {
+        else if (e.charCode === 110) {
             $('#next').click();
         }
     });
@@ -198,4 +204,5 @@ showDiff('https://ff14-light.fandom.com/de/', '12925');
 https://leagueoflegends.fandom.com/wiki/?diff=2984657
 showDiff('https://leagueoflegends.fandom.com/', '2984657');
 $.get('https://cors-anywhere.herokuapp.com/https://dontstarve.fandom.com/api.php?action=query&prop=revisions&revids=461184&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d){console.log(d)});
+https://skyblock.fandom.com/wiki/Skyblock_Roblox_Wiki?diff=527
 */
