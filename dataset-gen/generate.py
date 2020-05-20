@@ -50,7 +50,22 @@ class DatasetGenerator():
         session.cookies = cj
         session.headers.update({'User-Agent': self.ua})
         return session
+    
+    """
+    Get LookupContribs data of a particular user
+    """
+    def lc(self, user, limit):
+        response = self.session.get('https://ucp.fandom.com/wiki/Special:LookupContribs?target=' + user + '&limit=' + str(limit))
+        soup = BeautifulSoup(response.content, 'html.parser')
+        table_rows = soup.find('table', class_='lookup-contribs__table').find('tbody').find_all('tr')
+
+        for row in table_rows:
+            cells = row.find_all('td')
+            wiki_data = (cells[1].find('a')['href'], int(cells[3].getText().strip()))
+            print(wiki_data)
+        return wiki_data
+
 
 if __name__ == '__main__':
     client = DatasetGenerator()
-    
+    client.lc('Noreplyz', '100')
