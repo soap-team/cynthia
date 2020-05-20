@@ -23,8 +23,11 @@ function login(password) {
     $('#diff-container').empty().append("Loading diff...");
     firebase.auth().signInWithEmailAndPassword('noreply@fandom.com', password).then(function() {
         console.log('logged in');
+        $('#login-message').empty().append('Logging in...');
+        $('#login-message').show();
     }).catch(function(error) {
-        $('body').append('Error: ' + error.message);
+        $('#login-message').empty().append('Error: ' + error.message);
+        $('#login-message').show();
     });
 }
 
@@ -141,6 +144,7 @@ function assignWorkset() {
             timeDiff = currTime - new Date(storedTime);
             console.log(timeDiff / 1000 / 60 / 60 + " hours");
             if (timeDiff / 1000 / 60 / 60 > 2) {
+                $('#dataset-message').hide();
                 found = true;
                 workset = e.key;
                 dbRef.child(e.key).set(currTime.toISOString());
@@ -152,7 +156,8 @@ function assignWorkset() {
             }
         });
         if (!found) {
-            console.log('No available worksets for ' + dataset);
+            $('#dataset-message').empty().append('No available worksets for ' + dataset + '. Please select another dataset.');
+            $('#dataset-message').show();
         }
     });
 }
@@ -164,6 +169,7 @@ function init() {
         if (user) {
             $('#login-form').hide();
             $('#diff-display').hide();
+            $('#login-message').hide();
             getDatasetList();
             $('#dataset-select').show();
         } else {
@@ -175,8 +181,6 @@ function init() {
     $('#login-button').on('click', function() {
         login($('#password').val());
         $('#password').val("");
-        console.log($('#dataset option:selected').val());
-        dataset = $('#dataset option:selected').val();
     });
     $('#next').on('click', function() {
         var wiki = diffLink.split('wiki')[0];
