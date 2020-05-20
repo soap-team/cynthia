@@ -55,17 +55,53 @@ class DatasetGenerator():
     Get LookupContribs data of a particular user
     """
     def lc(self, user, limit):
-        response = self.session.get('https://ucp.fandom.com/wiki/Special:LookupContribs?target=' + user + '&limit=' + str(limit))
+        response = self.session.get('https://ucp.fandom.com/wiki/Special:LookupContribs', params={
+          'target': user,
+          'limit': str(limit)
+        })
         soup = BeautifulSoup(response.content, 'html.parser')
-        table_rows = soup.find('table', class_='lookup-contribs__table').find('tbody').find_all('tr')
+        try:
+            table_rows = soup.find('table', class_='lookup-contribs__table').find('tbody').find_all('tr')
+        except:
+            print('You do not have valid permissions to view LC data')
+            return None
 
+        wikis = []
         for row in table_rows:
             cells = row.find_all('td')
             wiki_data = (cells[1].find('a')['href'], int(cells[3].getText().strip()))
-            print(wiki_data)
-        return wiki_data
+            # print(wiki_data)
+            wikis.append(wiki_data)
+        return wikis
+
+    """
+    Get a list of user contributions
+    """
+    def contribs(self, wiki, user, limit):
+        response = self.session.get(wiki + 'api.php', params={
+            'action': 'query',
+            'list': 'usercontribs',
+            'ucuser': user,
+            'uclimit': limit,
+            'format': 'json'
+        })
+
+        return response.json()['query']['usercontribs']
+
+    """
+    Filter contribs to match regexes
+    """
+    def filter_contribs(self, contribs):
+        pass
+    
+    """
+    Obtain bad diffs - get the previous diff of good edits by VSTF members
+    """
+    def get_bad_diffs(self, filtered_contribs):
+        pass
 
 
 if __name__ == '__main__':
     client = DatasetGenerator()
     client.lc('Noreplyz', '100')
+    print(client.contribs('https://community.fandom.com/', 'Noreplyz', 100))
