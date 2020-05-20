@@ -134,19 +134,26 @@ function getDatasetList() {
 function assignWorkset() {
     dbRef = db.ref('datasets/' + dataset + '/')
     dbRef.once('value').then(function(snapshot) {
+        var found = false;
         snapshot.forEach(function(e) {
             storedTime = e.val();
             currTime = new Date();
             timeDiff = currTime - new Date(storedTime);
             console.log(timeDiff / 1000 / 60 / 60 + " hours");
-            if (timeDiff > 2) {
+            if (timeDiff / 1000 / 60 / 60 > 2) {
+                found = true;
                 workset = e.key;
                 dbRef.child(e.key).set(currTime.toISOString());
                 console.log(dataset + '/' + workset + ' timestamp updated ' + currTime.toISOString());
                 getNextDiff();
                 return true;
+            } else {
+                console.log(dataset + '/' + e.key + ' in use');
             }
         });
+        if (!found) {
+            console.log('No available worksets for ' + dataset);
+        }
     });
 }
 
