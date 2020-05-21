@@ -15,6 +15,8 @@ var dataset = '';
 var diffLink = '';
 var workset = '';
 
+var lockoutDuration = 2 * 1000 * 60 * 60;
+
 /**
  * Login via Firebase to enable write access
  * @param  password the password for the Firebase user
@@ -143,7 +145,7 @@ function assignWorkset() {
             currTime = new Date();
             timeDiff = currTime - new Date(storedTime);
             console.log(timeDiff / 1000 / 60 / 60 + " hours");
-            if (timeDiff / 1000 / 60 / 60 > 2) {
+            if (timeDiff  > lockoutDuration) {
                 $('#dataset-message').hide();
                 found = true;
                 workset = e.key;
@@ -236,4 +238,5 @@ https://leagueoflegends.fandom.com/wiki/?diff=2984657
 showDiff('https://leagueoflegends.fandom.com/', '2984657');
 $.get('https://cors-anywhere.herokuapp.com/https://dontstarve.fandom.com/api.php?action=query&prop=revisions&revids=461184&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d){console.log(d)});
 https://skyblock.fandom.com/wiki/Skyblock_Roblox_Wiki?diff=527
+"2020-05-20T12:48:03.710Z"
 */
