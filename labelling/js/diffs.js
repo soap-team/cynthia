@@ -57,9 +57,14 @@ function isLoggedIn() {
 function getDatasetList() {
     db.ref('datasets/').once('value').then(function(snapshot) {
         $('#dataset').empty();
-        snapshot.forEach(function(e) {
-            $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e.key + '">' + e.key + '</button>');
-        });
+        if (snapshot.exists()) {
+            snapshot.forEach(function(e) {
+                $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e.key + '">' + e.key + '</button>');
+            });
+        } else {
+            $('#dataset-message').hide();
+            $('#dataset').append('Datasets all complete.');
+        }
     });
 }
 
@@ -85,7 +90,12 @@ function assignWorkset() {
             });
             if (!found) {
                 $('#dataset-message').empty().append('No available worksets for ' + dataset + '. Please select another dataset.');
-                $('#dataset-message').show();
+                if (workset !== '') {
+                    $('#diff-display').hide();
+                    getDatasetList();
+                    $('#dataset-select').show();
+                }
+                    $('#dataset-message').show();
             }
         } else {
             workset = '';
@@ -113,7 +123,9 @@ function getNextDiff() {
             });    
         } else {
             console.log('workset finished');
-            dbRef = db.ref('datasets/' + dataset + '/' + workset + '/').remove();
+            dbRef = db.ref('datasets/' + dataset + '/' + workset + '/');
+            dbRef.onDisconnect().cancel();
+            dbRef.remove();
             assignWorkset();
         }
     });
