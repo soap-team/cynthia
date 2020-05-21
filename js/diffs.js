@@ -15,7 +15,9 @@ var dataset = '';
 var diffLink = '';
 var workset = '';
 
-var lockoutDuration = 2 * 1000 * 60 * 60;
+// Constants
+var inUse = 1;
+var notInUse = 0;
 
 /**
  * Login via Firebase to enable write access
@@ -48,6 +50,73 @@ function logout() {
  */
 function isLoggedIn() {
     return firebase.auth().currentUser != null ? true : false;
+}
+
+// Gets the names of each uncategorised dataset in the firebase database and 
+// adds buttons to the interface for each dataset
+function getDatasetList() {
+    db.ref('datasets/').once('value').then(function(snapshot) {
+        $('#dataset').empty();
+        snapshot.forEach(function(e) {
+            $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e.key + '">' + e.key + '</button>');
+        });
+    });
+}
+
+// Assigns the first available workset in the dataset to the user
+function assignWorkset() {
+    dbRef = db.ref('datasets/' + dataset + '/');
+    dbRef.once('value').then(function(snapshot) {
+        if (snapshot.exists()) {
+            var found = false;
+            snapshot.forEach(function(e) {
+                if (e.val() === 0) {
+                    $('#dataset-message').hide();
+                    found = true;
+                    workset = e.key;
+                    dbRef.child(workset).set(inUse);
+                    dbRef.child(workset).onDisconnect().set(notInUse);
+                    console.log(dataset + '/' + workset + ' now in use');
+                    getNextDiff();
+                    return true;
+                } else {
+                    console.log(dataset + '/' + e.key + ' in use');
+                }
+            });
+            if (!found) {
+                $('#dataset-message').empty().append('No available worksets for ' + dataset + '. Please select another dataset.');
+                $('#dataset-message').show();
+            }
+        } else {
+            workset = '';
+            dataset = '';
+            $('#dataset-message').empty().append('The dataset you selected has been completed. Please select another.');
+            $('#dataset-message').show();
+            $('#diff-display').hide();
+            getDatasetList();
+            $('#dataset-select').show();
+        }
+    });
+}
+
+// Gets the next diff in the workset and shows it
+function getNextDiff() {
+    console.log('getting next diff');
+    db.ref('uncategorised/' + dataset + '/' + workset + '/').once('value').then(function(snapshot) {
+        if (snapshot.exists()) {
+            snapshot.forEach(function(e) {
+                diffLink = e.val();
+                var wiki = diffLink.split('wiki')[0];
+                var revid = diffLink.split('diff=').pop();
+                showDiff(wiki, revid);
+                return true;
+            });    
+        } else {
+            console.log('workset finished');
+            dbRef = db.ref('datasets/' + dataset + '/' + workset + '/').remove();
+            assignWorkset();
+        }
+    });
 }
 
 // Displays the diff
@@ -100,20 +169,6 @@ function categoriseDiff(wiki, revid) {
     deleteFirstDiff();
 }
 
-// Gets the next diff in the workset and shows it
-function getNextDiff() {
-    console.log('getting next diff');
-    db.ref('uncategorised/' + dataset + '/' + workset + '/').once('value').then(function(snapshot) {
-        snapshot.forEach(function(e) {
-            diffLink = e.val();
-            var wiki = diffLink.split('wiki')[0];
-            var revid = diffLink.split('diff=').pop();
-            showDiff(wiki, revid);
-            return true;
-        });         
-    });
-}
-
 // Deletes the first key in the workset and gets the next one
 function deleteFirstDiff() {
     dbRef = db.ref('uncategorised/' + dataset + '/' + workset + '/');
@@ -121,46 +176,6 @@ function deleteFirstDiff() {
         console.log('removed key: ' + Object.keys(snapshot.val())[0]);
         dbRef.child(Object.keys(snapshot.val())[0]).remove();
         getNextDiff();
-    });
-}
-
-// Gets the names of each uncategorised dataset in the firebase database and 
-// adds buttons to the interface for each dataset
-function getDatasetList() {
-    db.ref('datasets/').once('value').then(function(snapshot) {
-        $('#dataset').empty();
-        snapshot.forEach(function(e) {
-            $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e.key + '">' + e.key + '</button>');
-        });
-    });
-}
-
-// Assigns the first available workset in the dataset to the user
-function assignWorkset() {
-    dbRef = db.ref('datasets/' + dataset + '/')
-    dbRef.once('value').then(function(snapshot) {
-        var found = false;
-        snapshot.forEach(function(e) {
-            storedTime = e.val();
-            currTime = new Date();
-            timeDiff = currTime - new Date(storedTime);
-            console.log(timeDiff / 1000 / 60 / 60 + " hours");
-            if (timeDiff  > lockoutDuration) {
-                $('#dataset-message').hide();
-                found = true;
-                workset = e.key;
-                dbRef.child(e.key).set(currTime.toISOString());
-                console.log(dataset + '/' + workset + ' timestamp updated ' + currTime.toISOString());
-                getNextDiff();
-                return true;
-            } else {
-                console.log(dataset + '/' + e.key + ' in use');
-            }
-        });
-        if (!found) {
-            $('#dataset-message').empty().append('No available worksets for ' + dataset + '. Please select another dataset.');
-            $('#dataset-message').show();
-        }
     });
 }
 
@@ -201,6 +216,9 @@ function init() {
     });
     $('#dataset-select-button').on('click', function() {
         $('#diff-display').hide();
+        db.ref('datasets/' + dataset + '/' + workset + '/').set(notInUse);
+        dataset = '';
+        workset = '';
         getDatasetList();
         $('#dataset-select').show();
     });
