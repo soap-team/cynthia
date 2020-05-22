@@ -72,7 +72,13 @@ class DatasetGenerator():
             wiki_data = (cells[1].find('a')['href'], int(cells[3].getText().strip()))
             # print(wiki_data)
             wikis.append(wiki_data)
-        return wikis
+        return list(wikis)
+    
+    """
+    Filter lc to match edit requirements
+    """
+    def filtered_lc(self, lc, min_edits, max_edits):
+        return list(filter(lambda d: d[1] >= min_edits and d[1] <= max_edits, lc))
 
     """
     Get a list of user contributions
@@ -103,5 +109,8 @@ class DatasetGenerator():
 
 if __name__ == '__main__':
     client = DatasetGenerator()
-    client.lc('Noreplyz', '100')
-    print(client.contribs('https://community.fandom.com/', 'Noreplyz', 100))
+    lc = client.lc('Noreplyz', '100')
+    print(lc)
+    print('----')
+    print(client.filtered_lc(lc, 1, 20))
+    # print(client.contribs('https://community.fandom.com/', 'Noreplyz', 100))
