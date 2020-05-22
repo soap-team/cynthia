@@ -10,11 +10,6 @@
 
 <body>
     <h1>Cynthia: diff labelling interface</h1>
-    <div id="dataset-select" style="display:none">
-        <p>This web app allows you to help the SOAP team (VSTF/GRASP) by <strong>labelling and categorising diffs</strong>. Labelled data will be used to develop, train and improve our detection tools.</p>
-        <h3>Select a dataset</h3>
-        <div id="dataset"></div>
-    </div>
     <div id="login-form">
         <p>This web app allows you to help the SOAP team (VSTF/GRASP) by <strong>labelling and categorising diffs</strong>. Labelled data will be used to develop, train and improve our detection tools.</p>
         <p>In order to start helping, you must have over 20 reports to the SOAP team, and you will need to obtain a password from Noreplyz.</p>
@@ -22,6 +17,13 @@
             <input type="password" id="password"/>
             <button type="submit" id="login-button">Login</button>
         </form>
+        <div id="login-message" style="display:none"></div>
+    </div>
+    <div id="dataset-select" style="display:none">
+        <p>This web app allows you to help the SOAP team (VSTF/GRASP) by <strong>labelling and categorising diffs</strong>. Labelled data will be used to develop, train and improve our detection tools.</p>
+        <h3>Select a dataset</h3>
+        <div id="dataset"></div>
+        <div id="dataset-message" style="display:none"></div>
     </div>
     <div id="diff-display" style="display:none">
         <button id="dataset-select-button">Back to Dataset selection</button>

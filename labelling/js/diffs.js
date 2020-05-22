@@ -13,6 +13,11 @@ var db = firebase.database();
 
 var dataset = '';
 var diffLink = '';
+var workset = '';
+
+// Constants
+var inUse = 1;
+var notInUse = 0;
 
 /**
  * Login via Firebase to enable write access
@@ -22,8 +27,11 @@ function login(password) {
     $('#diff-container').empty().append("Loading diff...");
     firebase.auth().signInWithEmailAndPassword('noreply@fandom.com', password).then(function() {
         console.log('logged in');
+        $('#login-message').empty().append('Logging in...');
+        $('#login-message').show();
     }).catch(function(error) {
-        $('body').append('Error: ' + error.message);
+        $('#login-message').empty().append('Error: ' + error.message);
+        $('#login-message').show();
     });
 }
 
@@ -42,6 +50,85 @@ function logout() {
  */
 function isLoggedIn() {
     return firebase.auth().currentUser != null ? true : false;
+}
+
+// Gets the names of each uncategorised dataset in the firebase database and 
+// adds buttons to the interface for each dataset
+function getDatasetList() {
+    db.ref('datasets/').once('value').then(function(snapshot) {
+        $('#dataset').empty();
+        if (snapshot.exists()) {
+            snapshot.forEach(function(e) {
+                $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e.key + '">' + e.key + '</button>');
+            });
+        } else {
+            $('#dataset-message').hide();
+            $('#dataset').append('Datasets all complete.');
+        }
+    });
+}
+
+// Assigns the first available workset in the dataset to the user
+function assignWorkset() {
+    dbRef = db.ref('datasets/' + dataset + '/');
+    dbRef.once('value').then(function(snapshot) {
+        if (snapshot.exists()) {
+            var found = false;
+            snapshot.forEach(function(e) {
+                if (e.val() === 0) {
+                    $('#dataset-message').hide();
+                    found = true;
+                    workset = e.key;
+                    dbRef.child(workset).set(inUse);
+                    dbRef.child(workset).onDisconnect().set(notInUse);
+                    console.log(dataset + '/' + workset + ' now in use');
+                    getNextDiff();
+                    return true;
+                } else {
+                    console.log(dataset + '/' + e.key + ' in use');
+                }
+            });
+            if (!found) {
+                $('#dataset-message').empty().append('No available worksets for ' + dataset + '. Please select another dataset.');
+                if (workset !== '') {
+                    $('#diff-display').hide();
+                    getDatasetList();
+                    $('#dataset-select').show();
+                }
+                    $('#dataset-message').show();
+            }
+        } else {
+            workset = '';
+            dataset = '';
+            $('#dataset-message').empty().append('The dataset you selected has been completed. Please select another.');
+            $('#dataset-message').show();
+            $('#diff-display').hide();
+            getDatasetList();
+            $('#dataset-select').show();
+        }
+    });
+}
+
+// Gets the next diff in the workset and shows it
+function getNextDiff() {
+    console.log('getting next diff');
+    db.ref('uncategorised/' + dataset + '/' + workset + '/').once('value').then(function(snapshot) {
+        if (snapshot.exists()) {
+            snapshot.forEach(function(e) {
+                diffLink = e.val();
+                var wiki = diffLink.split('wiki')[0];
+                var revid = diffLink.split('diff=').pop();
+                showDiff(wiki, revid);
+                return true;
+            });    
+        } else {
+            console.log('workset finished');
+            dbRef = db.ref('datasets/' + dataset + '/' + workset + '/');
+            dbRef.onDisconnect().cancel();
+            dbRef.remove();
+            assignWorkset();
+        }
+    });
 }
 
 // Displays the diff
@@ -80,53 +167,27 @@ function categoriseDiff(wiki, revid) {
     var dbRef = db.ref('categorised/' + dataset + '/' + newDiffKey + '/');
     dbRef.set({
         diff: wiki + 'wiki/?diff=' + revid,
-        categories: {
+        labels: {
             damaging: 0,
             spam: 0,
-            goodfaith: 0,
-            good: 0
+            goodfaith: 0
         }
     })
     var checked = $('input[name=options]:checked');
     checked.each(function() {
-        dbRef.child('categories/' + this.id).set(1);
+        dbRef.child('labels/' + this.id).set(1);
     });
 
     deleteFirstDiff();
 }
 
-// Gets the next diff in the workset and shows it
-function getNextDiff() {
-    console.log('getting next diff');
-    db.ref('uncategorised/' + dataset + '/').once('value').then(function(snapshot) {
-        snapshot.forEach(function(e) {
-            diffLink = e.val();
-            var wiki = diffLink.split('wiki')[0];
-            var revid = diffLink.split('diff=').pop();
-            showDiff(wiki, revid);
-            return true;
-        });         
-    });
-}
-
 // Deletes the first key in the workset and gets the next one
 function deleteFirstDiff() {
-    dbRef = db.ref('uncategorised/' + dataset + '/');
+    dbRef = db.ref('uncategorised/' + dataset + '/' + workset + '/');
     dbRef.once('value').then(function(snapshot) {
         console.log('removed key: ' + Object.keys(snapshot.val())[0]);
         dbRef.child(Object.keys(snapshot.val())[0]).remove();
         getNextDiff();
-    });
-}
-
-// Gets the names of each uncategorised dataset in the firebase database and 
-// adds buttons to the interface for each dataset
-function getDatasetList() {
-    db.ref('uncategorised/').once('value').then(function(snapshot) {
-        $('#dataset').empty();
-        Object.keys(snapshot.val()).forEach(function(e) {
-            $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e + '">' + e + '</button>');
-        });
     });
 }
 
@@ -137,6 +198,7 @@ function init() {
         if (user) {
             $('#login-form').hide();
             $('#diff-display').hide();
+            $('#login-message').hide();
             getDatasetList();
             $('#dataset-select').show();
         } else {
@@ -148,8 +210,6 @@ function init() {
     $('#login-button').on('click', function() {
         login($('#password').val());
         $('#password').val("");
-        console.log($('#dataset option:selected').val());
-        dataset = $('#dataset option:selected').val();
     });
     $('#next').on('click', function() {
         var wiki = diffLink.split('wiki')[0];
@@ -164,10 +224,13 @@ function init() {
     $('#dataset').on('click', '.dataset-buttons', function() {
         dataset = $(this).text();
         console.log(dataset);
-        getNextDiff();
+        assignWorkset();
     });
     $('#dataset-select-button').on('click', function() {
         $('#diff-display').hide();
+        db.ref('datasets/' + dataset + '/' + workset + '/').set(notInUse);
+        dataset = '';
+        workset = '';
         getDatasetList();
         $('#dataset-select').show();
     });
@@ -205,4 +268,5 @@ https://leagueoflegends.fandom.com/wiki/?diff=2984657
 showDiff('https://leagueoflegends.fandom.com/', '2984657');
 $.get('https://cors-anywhere.herokuapp.com/https://dontstarve.fandom.com/api.php?action=query&prop=revisions&revids=461184&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d){console.log(d)});
 https://skyblock.fandom.com/wiki/Skyblock_Roblox_Wiki?diff=527
+"2020-05-20T12:48:03.710Z"
 */
