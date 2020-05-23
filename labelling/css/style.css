@@ -322,3 +322,14 @@ body {
     opacity: 1;
     visibility: visible;
 }
+
+@media only screen and (max-width: 768px) {
+    *:hover>.tooltip {
+        display: none;
+    }
+
+    #next {
+        display: block;
+        float: none;
+    }
+}
