@@ -87,13 +87,17 @@ class DatasetGenerator():
     Get a list of user contributions
     """
     def contribs(self, wiki, user, limit):
-        res = self.session.get(wiki + 'api.php', params={
-            'action': 'query',
-            'list': 'usercontribs',
-            'ucuser': user,
-            'uclimit': limit,
-            'format': 'json'
-        })
+        try:
+            res = self.session.get(wiki + 'api.php', params={
+                'action': 'query',
+                'list': 'usercontribs',
+                'ucuser': user,
+                'uclimit': limit,
+                'format': 'json'
+            })
+        except (requests.exceptions.SSLError) as e:
+            print('Failed to get contribs for ' + wiki)
+            return []
         try:
             return res.json()['query']['usercontribs']
         except (json.decoder.JSONDecodeError, KeyError) as e:
@@ -126,20 +130,29 @@ class DatasetGenerator():
             return False
         return list(filter(is_vandalism, contribs))
 
+
 if __name__ == '__main__':
-    soap_member = 'Noreplyz'
-    client = DatasetGenerator()
+    data_users = []
+    for username in data_users:
+        client = DatasetGenerator()
 
-    # Get LC
-    lc = client.lc(soap_member, '1000')
-    filtered_lc = client.filtered_lc(lc, 1, 20)
+        # Get LC
+        lc = client.lc(username, '1000')
+        filtered_lc = client.filtered_lc(lc, 1, 20)
 
-    # Loop through wikis and get contribs
-    reverted = []
-    for wiki, edits in filtered_lc:
-        contribs = client.contribs(wiki, soap_member, 100)
-        filtered_contribs = client.filter_contribs(contribs, wiki)
-        for fc in filtered_contribs:
-            # For each filtered edit, get previous
-            reverted.append((wiki, client.get_prev_diff(wiki, fc['revid'])))
-            print(wiki + 'wiki/?diff=' + str(client.get_prev_diff(wiki, fc['revid'])))
+        # Loop through wikis and get contribs
+        reverted = []
+        for wiki, edits in filtered_lc:
+            contribs = client.contribs(wiki, username, 100)
+            filtered_contribs = client.filter_contribs(contribs, wiki)
+            contribs_per_wiki = 3
+            for fc in filtered_contribs:
+                # For each filtered edit, get previous
+                reverted.append((wiki, client.get_prev_diff(wiki, fc['revid'])))
+                with open(username + '.txt', 'a') as log:
+                    log.write(wiki + 'wiki/?diff=' + str(client.get_prev_diff(wiki, fc['revid'])) + '\n')
+
+                # only get a number of contribs per wiki
+                contribs_per_wiki -= 1
+                if contribs_per_wiki == 0:
+                    break
