@@ -151,7 +151,7 @@ function showDiff(wiki, revid) {
                 '</colgroup>');
             $('#diff-display').show();
             $('#dataset-select').hide();
-            console.log('showing ' + wiki + revid);
+            console.log('showing ' + wiki + 'wiki/?diff=' + revid);
             $('#diff tbody').empty().append(d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff['*']);
             $('#categories').show();
             $('#next').prop('disabled', false);
