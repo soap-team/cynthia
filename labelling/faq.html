@@ -1,0 +1,37 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cynthia: diff labelling interface</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body style="line-height:180%;">
+    <h1>Cynthia: diff labelling interface</h1>
+    <a href="./"><button>Back to main page</button></a>
+    <h2>Instructions</h2>
+    <p>Thank you for helping us with labelling edits. We will use this data to improve and develop our vandalism detection tools.</p>
+    <p>There are three labels that you can apply to any edit.</p>
+    <ul>
+        <li><b>Good edits should have no labels.</b></li>
+        <li><b>Damaging</b>: Does the edit deliberately remove or damage the usefulness of the article content? Any vandalism should be labelled as damaging.</li>
+        <li><b>Spam</b>: Is the edit an unwanted advertisement?</li>
+        <li><b>Good-faith</b>: Does it appear as though the author of this edit was trying to contribute productively? Damaging edits may be done with good faith, for example, someone may be attempting to revert vandalism to the wrong version, or they are adding 20 random categories.</li>
+    </ul>
+    <p>The dataset you should work on is <b><code>en-info-dataset-1</code></b>. Other datasets may appear, but please focus on this one. </p>
+    <h2>Frequently asked questions</h2>
+    <h3>1. I am unsure of an edit</h3>
+    Choose the best labels that describe the edit. You can ask Noreplyz about an edit if you are very unsure - but generally it is okay if you label the edit and you're not totally sure.
+
+    <h3>2. I mislabelled an edit</h3>
+    Please open DevTools (CTRL + SHIFT + I), click on the Console tab, and find the diff link that is mislabelled. Then, send a DM to Noreplyz with the requested changes. Please provide the workset ID (in the format <code>ws-XX</code> - it should say <code>ws-XX now in use</code>) and the diff link.
+
+    <h3>3. Can multiple people categorise at once?</h3>
+    Yes - each user is assigned a 'workset' when joining and the workset is unassigned automatically after closing the tab or window.
+
+    <h3>4. Why are the usernames/timestamps missing?</h3>
+    We want to use this data and train bots to only rely on diffs as an independent datapoint. A user's username or the time of their edit can influence the particular label you apply, so it is hidden.
+</body>
+</html>

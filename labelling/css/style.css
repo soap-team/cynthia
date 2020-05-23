@@ -245,9 +245,11 @@ body {
 /* Tiles */
 .tile {
     border-radius: 0;
+    font-size: 14px;
     margin-bottom: 8px;
     text-align: left;
     width: 100%;
+    padding: 16px;
 }
 
 /* Categories */
@@ -270,6 +272,11 @@ body {
     background: #1a5eb8;
     color: #FFF;
     float: right;
+}
+
+#next:disabled {
+    background: #BBB;
+    cursor: not-allowed;
 }
 
 /* Tooltips */
@@ -314,4 +321,15 @@ body {
     display: block;
     opacity: 1;
     visibility: visible;
+}
+
+@media only screen and (max-width: 768px) {
+    *:hover>.tooltip {
+        display: none;
+    }
+
+    #next {
+        display: block;
+        float: none;
+    }
 }

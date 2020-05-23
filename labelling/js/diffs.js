@@ -19,6 +19,8 @@ var workset = '';
 var inUse = 1;
 var notInUse = 0;
 
+$('#next').prop('disabled', true);
+
 /**
  * Login via Firebase to enable write access
  * @param  password the password for the Firebase user
@@ -59,7 +61,8 @@ function getDatasetList() {
         $('#dataset').empty();
         if (snapshot.exists()) {
             snapshot.forEach(function(e) {
-                $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e.key + '">' + e.key + '</button>');
+                $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e.key + '">' + e.key + 
+                    ' <span style="font-weight:normal; float:right">(approx ' + Object.keys(e.val()).length * 20 + ' left)</span></button>');
             });
         } else {
             $('#dataset-message').hide();
@@ -134,7 +137,7 @@ function getNextDiff() {
 // Displays the diff
 function showDiff(wiki, revid) {
     $('#diff-container').empty().append("Loading diff...");
-    $.get('https://cors-anywhere.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid + 
+    $.get('https://calm-oasis-68089.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid +
             '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
         if (d.query.pages != null) {
             $('#diff-container').empty().append('<h3>' + d.query.pages[Object.keys(d.query.pages)[0]].title + '</h3>');
@@ -148,9 +151,10 @@ function showDiff(wiki, revid) {
                 '</colgroup>');
             $('#diff-display').show();
             $('#dataset-select').hide();
-            console.log('showing ' + wiki + revid);
+            console.log('showing ' + wiki + 'wiki/?diff=' + revid);
             $('#diff tbody').empty().append(d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff['*']);
             $('#categories').show();
+            $('#next').prop('disabled', false);
         } else {
             console.log('skipping deleted diff, removed from db');
             deleteFirstDiff();
@@ -212,6 +216,11 @@ function init() {
         $('#password').val("");
     });
     $('#next').on('click', function() {
+        if ($(this).prop('disabled') || $(this).is(':disabled') || $(this).attr('disabled')) {
+            return;
+        } else {
+            $('#next').prop('disabled', true);
+        }
         var wiki = diffLink.split('wiki')[0];
         var revid = diffLink.split('diff=').pop();
         categoriseDiff(wiki, revid);
@@ -222,12 +231,13 @@ function init() {
         $("#good").prop("checked", false);
     });
     $('#dataset').on('click', '.dataset-buttons', function() {
-        dataset = $(this).text();
+        dataset = $(this).data('id');
         console.log(dataset);
         assignWorkset();
     });
     $('#dataset-select-button').on('click', function() {
         $('#diff-display').hide();
+        $('#next').prop('disabled', true);
         db.ref('datasets/' + dataset + '/' + workset + '/').set(notInUse);
         dataset = '';
         workset = '';
