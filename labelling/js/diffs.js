@@ -61,7 +61,8 @@ function getDatasetList() {
         $('#dataset').empty();
         if (snapshot.exists()) {
             snapshot.forEach(function(e) {
-                $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e.key + '">' + e.key + '</button>');
+                $('#dataset').append('<button class="dataset-buttons tile" data-id="' + e.key + '">' + e.key + 
+                    ' <span style="font-weight:normal; float:right">(approx ' + Object.keys(e.val()).length * 20 + ' left)</span></button>');
             });
         } else {
             $('#dataset-message').hide();
