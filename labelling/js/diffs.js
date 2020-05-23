@@ -137,7 +137,7 @@ function getNextDiff() {
 // Displays the diff
 function showDiff(wiki, revid) {
     $('#diff-container').empty().append("Loading diff...");
-    $.get('https://cors-anywhere.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid + 
+    $.get('https://calm-oasis-68089.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid +
             '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
         if (d.query.pages != null) {
             $('#diff-container').empty().append('<h3>' + d.query.pages[Object.keys(d.query.pages)[0]].title + '</h3>');
