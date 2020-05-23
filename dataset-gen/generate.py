@@ -118,6 +118,33 @@ class DatasetGenerator():
             return pages[page]['revisions'][0]['parentid']
         
         return None
+    
+    # https://mario.fandom.com/api.php?action=query&prop=revisions&revids=288644&rvprop=ids|comment&rvdiffto=next&format=json
+    # Returns true if the edit does not have a revert after it
+    # false if the edit is reverted
+    def is_good_next_diff(self, wiki, curr_diff):
+        try:
+            res = self.session.get(wiki + 'api.php', params={
+                'action': 'query',
+                'prop': 'revisions',
+                'revids': curr_diff,
+                'rvprop': 'ids|comment',
+                'rvdiffto': 'next',
+                'format': 'json'
+            })
+            pages = res.json()['query']['pages']
+        except (json.decoder.JSONDecodeError, KeyError) as e:
+            print('Failed to get diff ' + wiki + ', ' + str(curr_diff))
+            return False
+        
+        for page in pages:
+            hasDiff = pages[page]['revisions'][0]['diff']['to']
+            if int(hasDiff) == 0:
+                return True # Good
+            elif re.match(self.re_like_rollback, pages[page]['revisions'][0]['comment']):
+                return False
+            return True        
+        return False
 
     """
     Filter contribs to match various rules
@@ -131,7 +158,7 @@ class DatasetGenerator():
         return list(filter(is_vandalism, contribs))
 
 
-if __name__ == '__main__':
+def get_split_3():
     data_users = []
     for username in data_users:
         client = DatasetGenerator()
@@ -156,3 +183,42 @@ if __name__ == '__main__':
                 contribs_per_wiki -= 1
                 if contribs_per_wiki == 0:
                     break
+
+def get_split_1():
+    client = DatasetGenerator()
+    with open('potentially-good-recent.txt') as f:
+        diffs = f.readlines()
+
+    diffs = [s.strip() for s in diffs] 
+    print(diffs)
+
+    for diff in diffs:
+        if client.is_good_next_diff(re.findall(r'^(https?:\/\/.*\.(com|org)\/)', diff)[0][0], re.findall(r'\d+$', diff)[0]):
+            with open('data/good-recent.txt', 'a') as log:
+                log.write(diff + '\n')
+        else:
+            print(diff + ' is bad')
+
+def get_split_2():
+    client = DatasetGenerator()
+    with open('data/admin-reverts.txt') as f:
+        diffs = f.readlines()
+
+    diffs = [s.strip() for s in diffs] 
+    print(diffs)
+
+    for diff in diffs:
+        wiki = re.findall(r'^(https?:\/\/.*\.(com|org)\/)', diff)[0][0]
+        try:
+            prev = client.get_prev_diff(wiki, re.findall(r'\d+$', diff)[0])
+        except KeyError:
+            prev = None
+        if prev:
+            with open('data/bad-admin-reverted.txt', 'a') as log:
+                log.write(wiki + 'wiki/?diff=' + str(prev) + '\n')
+        else:
+            print(diff + ' is bad')
+            
+
+if __name__ == '__main__':
+    get_split_2()
