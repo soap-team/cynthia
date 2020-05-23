@@ -176,7 +176,7 @@ def get_split_3():
             for fc in filtered_contribs:
                 # For each filtered edit, get previous
                 reverted.append((wiki, client.get_prev_diff(wiki, fc['revid'])))
-                with open(username + '.txt', 'a') as log:
+                with open('data/' + username + '.txt', 'a') as log:
                     log.write(wiki + 'wiki/?diff=' + str(client.get_prev_diff(wiki, fc['revid'])) + '\n')
 
                 # only get a number of contribs per wiki
@@ -186,11 +186,10 @@ def get_split_3():
 
 def get_split_1():
     client = DatasetGenerator()
-    with open('potentially-good-recent.txt') as f:
+    with open('data/potentially-good-recent.txt') as f:
         diffs = f.readlines()
 
-    diffs = [s.strip() for s in diffs] 
-    print(diffs)
+    diffs = [s.strip() for s in diffs]
 
     for diff in diffs:
         if client.is_good_next_diff(re.findall(r'^(https?:\/\/.*\.(com|org)\/)', diff)[0][0], re.findall(r'\d+$', diff)[0]):
@@ -204,8 +203,7 @@ def get_split_2():
     with open('data/admin-reverts.txt') as f:
         diffs = f.readlines()
 
-    diffs = [s.strip() for s in diffs] 
-    print(diffs)
+    diffs = [s.strip() for s in diffs]
 
     for diff in diffs:
         wiki = re.findall(r'^(https?:\/\/.*\.(com|org)\/)', diff)[0][0]
