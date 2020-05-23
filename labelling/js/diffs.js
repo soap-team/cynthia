@@ -231,7 +231,7 @@ function init() {
         $("#good").prop("checked", false);
     });
     $('#dataset').on('click', '.dataset-buttons', function() {
-        dataset = $(this).text();
+        dataset = $(this).data('id');
         console.log(dataset);
         assignWorkset();
     });
