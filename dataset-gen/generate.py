@@ -2,6 +2,7 @@ import requests
 import json
 import configparser
 from bs4 import BeautifulSoup
+import re
 
 """
 Generate a JSON file with diffs
@@ -11,6 +12,8 @@ class DatasetGenerator():
         self.ua = 'cynthia/1.0, SOAP ML Project Bot'
         self.loggedin = False
         self.session = self.login()
+        self.re_like_rollback = re.compile('(revert|vandal|undo|undid)', re.I)
+        self.re_rollback = re.compile('^Reverted edits by \[\[')
 
     """
     Authenticate via services. Credentials are stored in 'config.ini'
@@ -69,48 +72,74 @@ class DatasetGenerator():
         wikis = []
         for row in table_rows:
             cells = row.find_all('td')
-            wiki_data = (cells[1].find('a')['href'], int(cells[3].getText().strip()))
+            wiki_data = (cells[1].find('a')['href'].replace('http://', 'https://'), int(cells[3].getText().strip()))
             # print(wiki_data)
             wikis.append(wiki_data)
         return list(wikis)
     
     """
-    Filter lc to match edit requirements
+    Filter lc to match edit requirements and is English
     """
     def filtered_lc(self, lc, min_edits, max_edits):
-        return list(filter(lambda d: d[1] >= min_edits and d[1] <= max_edits, lc))
+        return list(filter(lambda d: d[1] >= min_edits and d[1] <= max_edits and re.search(r'\.com/$', d[0]), lc))
 
     """
     Get a list of user contributions
     """
     def contribs(self, wiki, user, limit):
-        response = self.session.get(wiki + 'api.php', params={
+        res = self.session.get(wiki + 'api.php', params={
             'action': 'query',
             'list': 'usercontribs',
             'ucuser': user,
             'uclimit': limit,
             'format': 'json'
         })
-
-        return response.json()['query']['usercontribs']
-
-    """
-    Filter contribs to match regexes
-    """
-    def filter_contribs(self, contribs):
-        pass
+        try:
+            return res.json()['query']['usercontribs']
+        except (json.decoder.JSONDecodeError, KeyError) as e:
+            print('Failed to get contribs for ' + wiki)
+            return []
     
-    """
-    Obtain bad diffs - get the previous diff of good edits by VSTF members
-    """
-    def get_bad_diffs(self, filtered_contribs):
-        pass
+    # https://mario.fandom.com/api.php?action=query&prop=revisions&revids=288644&rvprop=ids|comment&rvdiffto=prev&format=json
+    def get_prev_diff(self, wiki, curr_diff):
+        res = self.session.get(wiki + 'api.php', params={
+            'action': 'query',
+            'prop': 'revisions',
+            'revids': curr_diff,
+            'rvprop': 'ids|comment',
+            'format': 'json'
+        })
+        pages = res.json()['query']['pages']
+        for page in pages:
+            return pages[page]['revisions'][0]['parentid']
+        
+        return None
 
+    """
+    Filter contribs to match various rules
+    Return diff list
+    """
+    def filter_contribs(self, contribs, wiki):
+        def is_vandalism(contrib):
+            if re.match(self.re_like_rollback, contrib['comment']):
+                return True
+            return False
+        return list(filter(is_vandalism, contribs))
 
 if __name__ == '__main__':
+    soap_member = 'Noreplyz'
     client = DatasetGenerator()
-    lc = client.lc('Noreplyz', '100')
-    print(lc)
-    print('----')
-    print(client.filtered_lc(lc, 1, 20))
-    # print(client.contribs('https://community.fandom.com/', 'Noreplyz', 100))
+
+    # Get LC
+    lc = client.lc(soap_member, '1000')
+    filtered_lc = client.filtered_lc(lc, 1, 20)
+
+    # Loop through wikis and get contribs
+    reverted = []
+    for wiki, edits in filtered_lc:
+        contribs = client.contribs(wiki, soap_member, 100)
+        filtered_contribs = client.filter_contribs(contribs, wiki)
+        for fc in filtered_contribs:
+            # For each filtered edit, get previous
+            reverted.append((wiki, client.get_prev_diff(wiki, fc['revid'])))
+            print(wiki + 'wiki/?diff=' + str(client.get_prev_diff(wiki, fc['revid'])))
