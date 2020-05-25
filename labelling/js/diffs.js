@@ -142,7 +142,7 @@ function showDiff(wiki, revid) {
     $('#diff-container').empty().append("Loading diff...");
     $.get('https://calm-oasis-68089.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid +
             '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
-        if (d.query.pages != null) {
+        if (d.query.pages) {
             $('#diff-container').empty().append('<h3>' + d.query.pages[Object.keys(d.query.pages)[0]].title + '</h3>');
             $('#diff-container').append('comment: ' + d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].comment + '<br/>');
             $('#diff-container').append('<a href="' + diffLink + '" target="_blank">' + diffLink + '</a>');
