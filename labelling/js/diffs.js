@@ -121,7 +121,7 @@ function getNextDiff() {
         if (snapshot.exists()) {
             snapshot.forEach(function(e) {
                 diffLink = e.val();
-                var wiki = diffLink.split('wiki')[0];
+                var wiki = diffLink.split('wiki/')[0];
                 var revid = diffLink.split('diff=').pop();
                 showDiff(wiki, revid);
                 return true;
@@ -169,11 +169,11 @@ function showDiff(wiki, revid) {
             $('#categories').show();
             $('#next').prop('disabled', false);
         } else {
-            console.log('skipping deleted diff, removed from db');
+            console.log('skipping deleted diff, ' + wiki + 'wiki/?diff=' + revid + ' removed from db');
             deleteFirstDiff();
         }
    }).catch(function() {
-        console.log('skipping deleted wiki, removed from db');
+        console.log('skipping deleted wiki, ' + wiki + 'wiki/?diff=' + revid + ' removed from db');
         deleteFirstDiff();
    });
 }
@@ -234,7 +234,7 @@ function init() {
         } else {
             $('#next').prop('disabled', true);
         }
-        var wiki = diffLink.split('wiki')[0];
+        var wiki = diffLink.split('wiki/')[0];
         var revid = diffLink.split('diff=').pop();
         categoriseDiff(wiki, revid);
         
