@@ -173,7 +173,7 @@ function showDiff(wiki, revid) {
             deleteFirstDiff();
         }
    }).catch(function() {
-        console.log('skipping deleted wiki, ' + wiki + 'wiki/?diff=' + revid + ' removed from db');
+        console.log('skipping deleted wiki/broken link, ' + wiki + 'wiki/?diff=' + revid + ' removed from db');
         deleteFirstDiff();
    });
 }
