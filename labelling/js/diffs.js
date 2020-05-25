@@ -151,8 +151,18 @@ function showDiff(wiki, revid) {
                 '</colgroup>');
             $('#diff-display').show();
             $('#dataset-select').hide();
+            if (d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff.from === false) {
+                var content = d.query.pages[Object.keys(d.query.pages)[0]].revisions[0]['*'].split('\n');
+                $('#diff tbody').empty();
+                $('#diff tbody').append('<td colspan="2" class="diff-lineno">Line 1:</td>');
+                content.forEach(function(e) {
+                    $('#diff tbody').append('<tr><td class="diff-marker">+</td><td class="diff-addedline"><div>' + e + '</div></td></tr>');
+                });
+                console.log('diff is a new page');
+            } else {
+                $('#diff tbody').empty().append(d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff['*']);
+            }
             console.log('showing ' + wiki + 'wiki/?diff=' + revid);
-            $('#diff tbody').empty().append(d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff['*']);
             $('#categories').show();
             $('#next').prop('disabled', false);
         } else {
