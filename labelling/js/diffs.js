@@ -15,6 +15,8 @@ var dataset = '';
 var diffLink = '';
 var workset = '';
 
+var keypressEnabled = false;
+
 // Constants
 var inUse = 1;
 var notInUse = 0;
@@ -119,7 +121,7 @@ function getNextDiff() {
         if (snapshot.exists()) {
             snapshot.forEach(function(e) {
                 diffLink = e.val();
-                var wiki = diffLink.split('wiki')[0];
+                var wiki = diffLink.split('wiki/')[0];
                 var revid = diffLink.split('diff=').pop();
                 showDiff(wiki, revid);
                 return true;
@@ -136,10 +138,11 @@ function getNextDiff() {
 
 // Displays the diff
 function showDiff(wiki, revid) {
+    keypressEnabled = true;
     $('#diff-container').empty().append("Loading diff...");
     $.get('https://calm-oasis-68089.herokuapp.com/' + wiki + 'api.php?action=query&prop=revisions&revids=' + revid +
             '&rvprop=ids|timestamp|flags|comment|user|content&rvdiffto=prev&format=json').then(function(d) {
-        if (d.query.pages != null) {
+        if (d.query.pages) {
             $('#diff-container').empty().append('<h3>' + d.query.pages[Object.keys(d.query.pages)[0]].title + '</h3>');
             $('#diff-container').append('comment: ' + d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].comment + '<br/>');
             $('#diff-container').append('<a href="' + diffLink + '" target="_blank">' + diffLink + '</a>');
@@ -151,7 +154,7 @@ function showDiff(wiki, revid) {
                 '</colgroup>');
             $('#diff-display').show();
             $('#dataset-select').hide();
-            if (d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff.from === false) {
+            if (!d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff.from) {
                 var content = d.query.pages[Object.keys(d.query.pages)[0]].revisions[0]['*'].split('\n');
                 $('#diff tbody').empty();
                 $('#diff tbody').append('<td colspan="2" class="diff-lineno">Line 1:</td>');
@@ -166,11 +169,11 @@ function showDiff(wiki, revid) {
             $('#categories').show();
             $('#next').prop('disabled', false);
         } else {
-            console.log('skipping deleted diff, removed from db');
+            console.log('skipping deleted diff, ' + wiki + 'wiki/?diff=' + revid + ' removed from db');
             deleteFirstDiff();
         }
    }).catch(function() {
-        console.log('skipping deleted wiki, removed from db');
+        console.log('skipping deleted wiki/broken link, ' + wiki + 'wiki/?diff=' + revid + ' removed from db');
         deleteFirstDiff();
    });
 }
@@ -231,14 +234,13 @@ function init() {
         } else {
             $('#next').prop('disabled', true);
         }
-        var wiki = diffLink.split('wiki')[0];
+        var wiki = diffLink.split('wiki/')[0];
         var revid = diffLink.split('diff=').pop();
         categoriseDiff(wiki, revid);
         
-        $("#damaging").prop("checked", false);
-        $("#spam").prop("checked", false);
-        $("#goodfaith").prop("checked", false);
-        $("#good").prop("checked", false);
+        $('#damaging').prop('checked', false);
+        $('#spam').prop('checked', false);
+        $('#goodfaith').prop('checked', false);
     });
     $('#dataset').on('click', '.dataset-buttons', function() {
         dataset = $(this).data('id');
@@ -246,6 +248,7 @@ function init() {
         assignWorkset();
     });
     $('#dataset-select-button').on('click', function() {
+        keypressEnabled = false;
         $('#diff-display').hide();
         $('#next').prop('disabled', true);
         db.ref('datasets/' + dataset + '/' + workset + '/').set(notInUse);
@@ -263,17 +266,19 @@ function init() {
 
     // Keyboard shortcuts
     $(document).keypress(function (e) {
-        if (e.charCode === 100) { // d
-            $('#damaging').prop('checked', !$('#damaging').prop('checked'));
-        }
-        else if (e.charCode === 115) { // s
-            $('#spam').prop('checked', !$('#spam').prop('checked'));
-        }
-        else if (e.charCode === 103) { // g
-            $('#goodfaith').prop('checked', !$('#goodfaith').prop('checked'));
-        }
-        else if (e.charCode === 110) {
-            $('#next').click();
+        if (keypressEnabled) {
+            if (e.charCode === 100) { // d
+                $('#damaging').prop('checked', !$('#damaging').prop('checked'));
+            }
+            else if (e.charCode === 115) { // s
+                $('#spam').prop('checked', !$('#spam').prop('checked'));
+            }
+            else if (e.charCode === 103) { // g
+                $('#goodfaith').prop('checked', !$('#goodfaith').prop('checked'));
+            }
+            else if (e.charCode === 110) {
+                $('#next').click();
+            }
         }
     });
 }
