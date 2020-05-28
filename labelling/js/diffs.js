@@ -23,6 +23,15 @@ var notInUse = 0;
 
 $('#next').prop('disabled', true);
 
+function escapeHTML(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
+
 /**
  * Login via Firebase to enable write access
  * @param  password the password for the Firebase user
@@ -155,11 +164,13 @@ function showDiff(wiki, revid) {
             $('#diff-display').show();
             $('#dataset-select').hide();
             if (!d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].diff.from) {
-                var content = d.query.pages[Object.keys(d.query.pages)[0]].revisions[0]['*'].split('\n');
+                var content = d.query.pages[Object.keys(d.query.pages)[0]].revisions[0]['*'];
+                content = escapeHTML(content);
+                content = content.split('\n');
                 $('#diff tbody').empty();
-                $('#diff tbody').append('<td colspan="2" class="diff-lineno">Line 1:</td>');
+                $('#diff tbody').append('<tr><td/><td/><td colspan="2" class="diff-lineno">Line 1:</td></tr>');
                 content.forEach(function(e) {
-                    $('#diff tbody').append('<tr><td class="diff-marker">+</td><td class="diff-addedline"><div>' + e + '</div></td></tr>');
+                    $('#diff tbody').append('<tr><td/><td/> <td class="diff-marker">+</td><td class="diff-addedline"><div>' + e + '</div></td></tr>');
                 });
                 console.log('diff is a new page');
             } else {
