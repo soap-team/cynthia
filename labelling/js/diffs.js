@@ -139,7 +139,11 @@ function getNextDiff() {
             console.log('workset finished');
             dbRef = db.ref('datasets/' + dataset + '/' + workset + '/');
             dbRef.onDisconnect().cancel();
-            dbRef.remove();
+            if (dataset !== '' and workset !== '') {
+                dbRef.remove();
+            } else {
+                console.log("Error removing workset");
+            }
             assignWorkset();
         }
     });
@@ -191,20 +195,24 @@ function showDiff(wiki, revid) {
 
 // Categories the diff
 function categoriseDiff(wiki, revid) {
-    var newDiffKey = db.ref('categorised/' + dataset + '/').push().key;
-    var dbRef = db.ref('categorised/' + dataset + '/' + newDiffKey + '/');
-    dbRef.set({
-        diff: wiki + 'wiki/?diff=' + revid,
-        labels: {
-            damaging: 0,
-            spam: 0,
-            goodfaith: 0
-        }
-    })
-    var checked = $('input[name=options]:checked');
-    checked.each(function() {
-        dbRef.child('labels/' + this.id).set(1);
-    });
+    if (dataset !== '') {
+        var newDiffKey = db.ref('categorised/' + dataset + '/').push().key;
+        var dbRef = db.ref('categorised/' + dataset + '/' + newDiffKey + '/');
+        dbRef.set({
+            diff: wiki + 'wiki/?diff=' + revid,
+            labels: {
+                damaging: 0,
+                spam: 0,
+                goodfaith: 0
+            }
+        })
+        var checked = $('input[name=options]:checked');
+        checked.each(function() {
+            dbRef.child('labels/' + this.id).set(1);
+        });
+    } else {
+        console.log('Error categorising diff');
+    }
 
     deleteFirstDiff();
 }
@@ -214,7 +222,11 @@ function deleteFirstDiff() {
     dbRef = db.ref('uncategorised/' + dataset + '/' + workset + '/');
     dbRef.once('value').then(function(snapshot) {
         console.log('removed key: ' + Object.keys(snapshot.val())[0]);
-        dbRef.child(Object.keys(snapshot.val())[0]).remove();
+        if (dataset !== '' and workset !== '') {
+            dbRef.child(Object.keys(snapshot.val())[0]).remove();
+        } else {
+            console.log("Error deleting diff");
+        }
         getNextDiff();
     });
 }
