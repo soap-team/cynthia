@@ -84,70 +84,75 @@ function getDatasetList() {
 
 // Assigns the first available workset in the dataset to the user
 function assignWorkset() {
-    dbRef = db.ref('datasets/' + dataset + '/');
-    dbRef.once('value').then(function(snapshot) {
-        if (snapshot.exists()) {
-            var found = false;
-            snapshot.forEach(function(e) {
-                if (e.val() === 0) {
-                    $('#dataset-message').hide();
-                    found = true;
-                    workset = e.key;
-                    dbRef.child(workset).set(inUse);
-                    dbRef.child(workset).onDisconnect().set(notInUse);
-                    console.log(dataset + '/' + workset + ' now in use');
-                    getNextDiff();
-                    return true;
-                } else {
-                    console.log(dataset + '/' + e.key + ' in use');
+    if (dataset !== '') {
+        dbRef = db.ref('datasets/' + dataset + '/');
+        dbRef.once('value').then(function(snapshot) {
+            if (snapshot.exists()) {
+                var found = false;
+                snapshot.forEach(function(e) {
+                    if (e.val() === 0) {
+                        $('#dataset-message').hide();
+                        found = true;
+                        workset = e.key;
+                        dbRef.child(workset).set(inUse);
+                        dbRef.child(workset).onDisconnect().set(notInUse);
+                        console.log(dataset + '/' + workset + ' now in use');
+                        getNextDiff();
+                        return true;
+                    } else {
+                        console.log(dataset + '/' + e.key + ' in use');
+                    }
+                });
+                if (!found) {
+                    $('#dataset-message').empty().append('No available worksets for ' + dataset + '. Please select another dataset.');
+                    if (workset !== '') {
+                        $('#diff-display').hide();
+                        getDatasetList();
+                        $('#dataset-select').show();
+                    }
+                        $('#dataset-message').show();
                 }
-            });
-            if (!found) {
-                $('#dataset-message').empty().append('No available worksets for ' + dataset + '. Please select another dataset.');
-                if (workset !== '') {
-                    $('#diff-display').hide();
-                    getDatasetList();
-                    $('#dataset-select').show();
-                }
-                    $('#dataset-message').show();
+            } else {
+                workset = '';
+                dataset = '';
+                $('#dataset-message').empty().append('The dataset you selected has been completed. Please select another.');
+                $('#dataset-message').show();
+                $('#diff-display').hide();
+                getDatasetList();
+                $('#dataset-select').show();
             }
-        } else {
-            workset = '';
-            dataset = '';
-            $('#dataset-message').empty().append('The dataset you selected has been completed. Please select another.');
-            $('#dataset-message').show();
-            $('#diff-display').hide();
-            getDatasetList();
-            $('#dataset-select').show();
-        }
-    });
+        });
+    } else { 
+        console.log('Error assigning workset');
+        $('#diff-container').empty().append("Something went wrong with assigning a workset. Please refresh the page and try again.");
+    }
 }
 
 // Gets the next diff in the workset and shows it
 function getNextDiff() {
     console.log('getting next diff');
-    db.ref('uncategorised/' + dataset + '/' + workset + '/').once('value').then(function(snapshot) {
-        if (snapshot.exists()) {
-            snapshot.forEach(function(e) {
-                diffLink = e.val();
-                var wiki = diffLink.split('wiki/')[0];
-                var revid = diffLink.split('diff=').pop();
-                showDiff(wiki, revid);
-                return true;
-            });    
-        } else {
-            console.log('workset finished');
-            dbRef = db.ref('datasets/' + dataset + '/' + workset + '/');
-            dbRef.onDisconnect().cancel();
-            if (dataset !== '' && workset !== '') {
-                dbRef.remove();
+    if (dataset !== '' && workset !== '') {
+        db.ref('uncategorised/' + dataset + '/' + workset + '/').once('value').then(function(snapshot) {
+            if (snapshot.exists()) {
+                snapshot.forEach(function(e) {
+                    diffLink = e.val();
+                    var wiki = diffLink.split('wiki/')[0];
+                    var revid = diffLink.split('diff=').pop();
+                    showDiff(wiki, revid);
+                    return true;
+                });    
             } else {
-                console.log('Error removing workset');
-                $('#diff-container').empty().append("Something went wrong with removing the workset. Please refresh the page and try again.");
+                console.log('workset finished');
+                dbRef = db.ref('datasets/' + dataset + '/' + workset + '/');
+                dbRef.onDisconnect().cancel();
+                dbRef.remove();
+                assignWorkset();
             }
-            assignWorkset();
-        }
-    });
+        });
+    } else {
+        console.log('Error removing workset');
+        $('#diff-container').empty().append("Something went wrong with removing the workset. Please refresh the page and try again.");
+    }
 }
 
 // Displays the diff
@@ -221,17 +226,17 @@ function categoriseDiff(wiki, revid) {
 
 // Deletes the first key in the workset and gets the next one
 function deleteFirstDiff() {
-    dbRef = db.ref('uncategorised/' + dataset + '/' + workset + '/');
-    dbRef.once('value').then(function(snapshot) {
-        console.log('removed key: ' + Object.keys(snapshot.val())[0]);
-        if (dataset !== '' && workset !== '') {
+    if (dataset !== '' && workset !== '') {
+        dbRef = db.ref('uncategorised/' + dataset + '/' + workset + '/');
+        dbRef.once('value').then(function(snapshot) {
+            console.log('removed key: ' + Object.keys(snapshot.val())[0]);
             dbRef.child(Object.keys(snapshot.val())[0]).remove();
-        } else {
-            console.log('Error deleting diff');
-            $('#diff-container').empty().append("Something went wrong with removing the diff. Please refresh the page and try again.");
-        }
-        getNextDiff();
-    });
+            getNextDiff();
+        });
+    } else {
+        console.log('Error deleting diff');
+        $('#diff-container').empty().append("Something went wrong with removing the diff. Please refresh the page and try again.");
+    }
 }
 
 // Initialises the app
