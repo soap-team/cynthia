@@ -143,8 +143,28 @@ class DatasetGenerator():
                 return True # Good
             elif re.match(self.re_like_rollback, pages[page]['revisions'][0]['comment']):
                 return False
-            return True        
+            return True
         return False
+    
+    # info (for namespace)
+    def get_diff(self, wiki, curr_diff):
+        try:
+            res = self.session.get(wiki + 'api.php', params={
+                'action': 'query',
+                'prop': 'revisions',
+                'revids': curr_diff,
+                'rvprop': 'ids|comment',
+                # 'rvdiffto': 'next',
+                'format': 'json'
+            })
+            pages = res.json()['query']['pages']
+        except (json.decoder.JSONDecodeError, KeyError) as e:
+            print('Failed to get diff ' + wiki + ', ' + str(curr_diff))
+            return False
+        
+        for page in pages:
+            return pages[page]
+        return None
 
     """
     Filter contribs to match various rules
@@ -216,7 +236,24 @@ def get_split_2():
                 log.write(wiki + 'wiki/?diff=' + str(prev) + '\n')
         else:
             print(diff + ' is bad')
-            
+
+def get_namespace_info():
+    client = DatasetGenerator()
+    with open('en-20k-dataset-2-data/cvn-wikia/processing/10k-cvn.txt') as f:
+        diffs = f.readlines()
+
+    diffs = [s.strip() for s in diffs]
+
+    for diff in diffs:
+        wiki = re.findall(r'^(https?:\/\/.*\.(com|org)\/)', diff)[0][0]
+        try:
+            prev = client.get_diff(wiki, re.findall(r'\d+$', diff)[0])
+        except KeyError:
+            prev = None
+        if prev:
+            if int(prev['ns']) in [0, 2, 3, 4, 5, 8, 9, 10, 11, 14, 15, 500, 828]:
+                with open('en-20k-dataset-2-data/10k-cvn-filtered-2.txt', 'a') as log:
+                    log.write(diff + '\n')
 
 if __name__ == '__main__':
-    get_split_2()
+    get_namespace_info()
