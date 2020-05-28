@@ -139,10 +139,11 @@ function getNextDiff() {
             console.log('workset finished');
             dbRef = db.ref('datasets/' + dataset + '/' + workset + '/');
             dbRef.onDisconnect().cancel();
-            if (dataset !== '' and workset !== '') {
+            if (dataset !== '' && workset !== '') {
                 dbRef.remove();
             } else {
-                console.log("Error removing workset");
+                console.log('Error removing workset');
+                $('#diff-container').empty().append("Something went wrong with removing the workset. Please refresh the page and try again.");
             }
             assignWorkset();
         }
@@ -212,8 +213,9 @@ function categoriseDiff(wiki, revid) {
         });
     } else {
         console.log('Error categorising diff');
-    }
+        $('#diff-container').empty().append("Something went wrong with categorising the diff. Please refresh the page and try again.");
 
+    }
     deleteFirstDiff();
 }
 
@@ -222,10 +224,11 @@ function deleteFirstDiff() {
     dbRef = db.ref('uncategorised/' + dataset + '/' + workset + '/');
     dbRef.once('value').then(function(snapshot) {
         console.log('removed key: ' + Object.keys(snapshot.val())[0]);
-        if (dataset !== '' and workset !== '') {
+        if (dataset !== '' && workset !== '') {
             dbRef.child(Object.keys(snapshot.val())[0]).remove();
         } else {
-            console.log("Error deleting diff");
+            console.log('Error deleting diff');
+            $('#diff-container').empty().append("Something went wrong with removing the diff. Please refresh the page and try again.");
         }
         getNextDiff();
     });
