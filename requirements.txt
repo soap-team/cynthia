@@ -8,11 +8,12 @@ certifi==2020.4.5.1
 chardet==3.0.4
 click==7.1.2
 deep-merge==0.0.4
-deltas==0.5.0
+deltas==0.5.1
 docopt==0.6.2
 docutils==0.15.2
--e git+https://github.com/wikimedia/editquality.git@923908d5b9e7e0278a38a4bb1ee947c10e3fa399#egg=editquality
+editquality==0.5.0
 flake8==3.3.0
+flashtext==2.7
 Flask==1.0.4
 Flask-Jsonpify==1.5.0
 flask-swaggerui==0.0.1
@@ -48,7 +49,7 @@ PyYAML==4.2b4
 redis==3.5.2
 regex==2020.5.14
 requests==2.23.0
--e git+https://github.com/wikimedia/revscoring.git@13604e7b8d29c7f6aa3616a9056e93288b7bc1ff#egg=revscoring
+-e git+https://github.com/soap-team/revscoring.git@4553355ba6f9aacbb933d9aeeec6b84656671fa9#egg=revscoring
 s3transfer==0.3.3
 scikit-learn==0.22.1
 scipy==1.2.3
