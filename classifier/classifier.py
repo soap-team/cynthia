@@ -45,7 +45,7 @@ training_features = []
 testing_features = []
 testing_features_2 = []
 
-with open('damaging-labels.json') as f:
+with open('damaging-badfaith-labels.json') as f:
 	content = json.load(f)
 	with open('../feature-gen/20k-features.tsv') as f1:
 		for line in f1.readlines()[:10000]:
@@ -67,7 +67,8 @@ is_reverted = GradientBoosting(features, labels=[True, False], version="live dem
 							   population_rates=None, scale=True, center=True, verbose=1)
 
 is_reverted.train(training_features)
-is_reverted.test(testing_features)
+stats = is_reverted.test(testing_features)
+
 print(is_reverted.info.format())
 
 with open('damaging-2020.model', 'wb') as model_file:
@@ -75,6 +76,8 @@ with open('damaging-2020.model', 'wb') as model_file:
 
 # with open('damaging-2020.model', 'rb') as model_file:
 #     is_reverted = Classifier.load(model_file)
+
+print(stats['thresholds'].format())
 
 reverted_obs = [(rev_features, diff) for rev_features, reverted, diff in testing_features_2 if reverted]
 non_reverted_obs = [(rev_features, diff) for rev_features, reverted, diff in testing_features_2 if not reverted]
