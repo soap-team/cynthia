@@ -1,0 +1,15 @@
+{
+    "irc": {
+        "network": "",
+        "rc": ""
+    },
+    "models": {
+        "damaging": "sample_classifier.model"
+    },
+    "discord": [
+        {
+            "webhook": "https://discordapp.com/api/webhooks/123456789123456789/CFOM39rcm08gh94RKC390rCFOM3_rcm08gh94RKC390rCFOM39rcm08gh94RKC390r38",
+            "min": 0.0, "max": 1.0
+        }
+    ]
+}
