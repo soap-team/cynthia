@@ -10,6 +10,22 @@
         {
             "webhook": "https://discordapp.com/api/webhooks/123456789123456789/CFOM39rcm08gh94RKC390rCFOM3_rcm08gh94RKC390rCFOM39rcm08gh94RKC390r38",
             "min": 0.0, "max": 1.0
+        },
+        {
+            "webhook": "https://discordapp.com/api/webhooks/123456789123456789/CFOM39rcm08gh94RKC390rCFOM3_rcm08gh94RKC390rCFOM39rcm08gh94RKC390r38",
+            "min": 0.9, "max": 1.0,
+            "verbose": true,
+            "content":  "$score: <$wiki/wiki/?diff=$diff>",
+            "embed": {
+                "description": "**Vandalism** | [$wiki]($wiki) | Page: [$page]($wiki/wiki/$page)",
+                "color": 15253632,
+                "footer": { "text": "Cynthia: machine learning bot" },
+                "fields": [
+                    { "name": "Score", "value": "$score", "inline": true },
+                    { "name": "Diff", "value": "[diff]($wiki/wiki/?diff=$diff)", "inline": true },
+                    { "name": "User", "value": "[$user]($wiki/wiki/Special:Contributions/$user)", "inline": true }
+                ]
+            }
         }
     ]
 }
