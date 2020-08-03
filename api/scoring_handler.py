@@ -18,7 +18,7 @@ class ScoringHandler:
 
         # Load classifier
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        with open(dir_path + '/' + config['models']['damaging'], 'rb') as model_file:
+        with open(dir_path + '/' + config['models']['en-damaging'], 'rb') as model_file:
             self.model = Classifier.load(model_file)
 
     # Check if page is in a scoreable namespace.
@@ -94,10 +94,11 @@ class ScoringHandler:
         return list(api_extractor.extract(int(diff), damaging))
 
     # Perform scoring
-    def perform_scoring(self, wiki, diff, start_time):
+    def perform_scoring(self, wiki, diff, model, start_time):
         if not self.is_scoreable_namespace(wiki, diff):
             return {
-                'error': 'Not a scorable namespace'
+                'error': 'Not a scorable namespace',
+                'probability': -1
             }
         features = self.get_features(wiki, diff)
         if features:
@@ -109,6 +110,7 @@ class ScoringHandler:
             }
         else:
             return {
-                'error': 'Could not extract features'
+                'error': 'Could not extract features',
+                'probability': -1
             }
             # self.send_discord(wiki, diff, score, features)
