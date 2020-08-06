@@ -54,10 +54,7 @@ def score(wiki, rev_id, model):
         return scoring_handler.perform_scoring('https://' + wiki, str(rev_id), model, time.time())
     except Exception as e:
         app.logger.info('ERROR:' + wiki + ':' + str(rev_id) + ':' + model + ':' + str(repr(e)))
-        return {
-            'error': 'General issue: ' + str(repr(e)),
-            'probability': -1
-        }
+        self.retry(exc=exc, countdown=2, max_retries=3) # retry after 2 seconds
 
 @app.route('/scores/', methods=["GET"])
 @cross_origin()
@@ -88,9 +85,8 @@ def score_revision(wiki, rev_id, model):
         return response
     except Exception as e:
         response = jsonify({
-            'error': 'Threading issue',
+            'error': 'General issue: ' + str(repr(e)),
             'probability': -1
         })
-        print(repr(e))
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
