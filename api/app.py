@@ -54,7 +54,7 @@ def score(wiki, rev_id, model):
         return scoring_handler.perform_scoring('https://' + wiki, str(rev_id), model, time.time())
     except Exception as e:
         app.logger.info('ERROR:' + wiki + ':' + str(rev_id) + ':' + model + ':' + str(repr(e)))
-        self.retry(exc=exc, countdown=2, max_retries=3) # retry after 2 seconds
+        self.retry(exc=e, countdown=2, max_retries=3) # retry after 2 seconds
 
 @app.route('/scores/', methods=["GET"])
 @cross_origin()
