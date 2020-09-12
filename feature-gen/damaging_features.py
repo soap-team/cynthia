@@ -6,10 +6,14 @@
 # https://witcher.fandom.com/de/wiki/?diff=1234
 
 import sys, re
+import logging
 import mwapi
-from editquality.feature_lists.enwiki import damaging
+from concurrent.futures import ProcessPoolExecutor
+from feature_lists.fandom import damaging
 from revscoring.extractors import api
 from revscoring.errors import TextDeleted, RevisionNotFound
+
+logging.getLogger('mwapi').setLevel(logging.ERROR) # silence 1.19 warnings
 
 with open('20k-revisions.txt') as f:
     revisions = [(re.search('([0-9]+)$', i.strip()).group(1), 
@@ -20,16 +24,27 @@ with open('20k-revisions.txt') as f:
 
 print(damaging)
 
-for rev in revisions[201:]:
+def get_and_store_features(diff, url):
     try:
-        print(rev)
-        session = mwapi.Session(rev[1], api_path='/api.php', 
+        print(diff, url)
+        session = mwapi.Session(url, api_path='/api.php', 
                     user_agent='Cynthia - Vandalism detection bot, @noreplyz')
         api_extractor = api.Extractor(session)
-        print(list(api_extractor.extract(int(rev[0]), damaging)))
+
+        with open('20k-features-damaging-2.tsv', 'a') as f:
+            # print(diff)
+            features = list(api_extractor.extract(int(diff), damaging))
+            features = [str(fea) for fea in features]
+            f.write(url + '/wiki/?diff=' + diff + '\t' + '\t'.join(features) + '\n')
+
     except RevisionNotFound:
         print('Revision not found.')
-        continue
+        return
     except Exception:
         print('Wiki closed, or other issue.')
-        continue
+        return
+
+executor = ProcessPoolExecutor(max_workers=4)
+
+for rev in revisions:
+    future = executor.submit(get_and_store_features, rev[0], rev[1])

@@ -3,7 +3,7 @@ import json
 import os
 import mwapi
 import time
-from editquality.feature_lists.enwiki import damaging
+from feature_lists.fandom import damaging
 from revscoring.extractors import api
 from revscoring.scoring.models import Classifier
 
