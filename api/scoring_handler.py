@@ -28,7 +28,10 @@ class ScoringHandler:
             page_data = page_data.json()
             page_id = next(iter(page_data['query']['pages']))
             ns = page_data['query']['pages'][page_id]['ns']
-            if ns not in [0, 2, 3, 4, 5, 8, 9, 10, 11, 14, 15, 500, 828]:
+            # Gamepedia keeps most? custom content/talk namespaces at 10000+
+            if '.gamepedia.com' in wiki and ns >= 10000:
+                return True
+            elif ns not in [0, 2, 3, 4, 5, 8, 9, 10, 11, 14, 15, 500, 828]:
                 return False
             return True
         except Exception:
