@@ -49,15 +49,12 @@ default_handler.setLevel(logging.ERROR)
 app.logger.addHandler(handler)
 
 @celery.task(serializer='json', name='process-next-task')
-def score(wiki, rev_id, model):
+def score(wiki, rev_id, model, **kwargs):
     try:
         return scoring_handler.perform_scoring('https://' + wiki, str(rev_id), model, time.time())
     except Exception as e:
         app.logger.info('ERROR:' + wiki + ':' + str(rev_id) + ':' + model + ':' + str(repr(e)))
-        return {
-            'error': 'General issue: ' + str(repr(e)),
-            'probability': -1
-        }
+        raise score.retry(args=[wiki, rev_id, model], exc=e, countdown=2, max_retries=3, kwargs=kwargs) # retry after 2 seconds
 
 @app.route('/scores/', methods=["GET"])
 @cross_origin()
@@ -82,15 +79,16 @@ def score_revision(wiki, rev_id, model):
         result = score.delay(wiki, rev_id, model)
         raw_response = result.wait()
         response = jsonify(raw_response)
-        if raw_response['probability'] != -1:
-            app.logger.info(wiki + ':' + str(rev_id) + ':' + model + ':' + str(raw_response['probability']))
+        if raw_response['probability'] >= 0.5:
+            app.logger.info(',' + wiki + ',' + str(rev_id) + ',' + model + ',' + str(raw_response['probability']))
+        else:
+            app.logger.info(',untracked,,' + model + ',' + str(raw_response['probability']))
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
     except Exception as e:
         response = jsonify({
-            'error': 'Threading issue',
+            'error': 'General issue: ' + str(repr(e)),
             'probability': -1
         })
-        print(repr(e))
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
