@@ -32,7 +32,7 @@ class ScoringHandler:
             page_id = next(iter(page_data['query']['pages']))
             ns = page_data['query']['pages'][page_id]['ns']
             # Generally okay scores from these namespaces
-            if ns in [0, 2, 3, 4, 5, 8, 9, 10, 11, 14, 15, 500, 828]:
+            if ns in [0, 2, 3, 4, 5, 8, 9, 10, 11, 12, 14, 15, 500, 828]:
                 return True
             # Allow scores from custom content namespaces
             elif '.gamepedia.com' in wiki:
