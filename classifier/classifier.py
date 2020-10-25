@@ -4,7 +4,7 @@ from revscoring.scoring.models import GradientBoosting, Classifier
 from revscoring.utilities.util import read_observations
 from feature_lists.fandom import damaging
 
-import json
+import json, random
 
 '''
 features = [
@@ -49,13 +49,14 @@ testing_features_2 = []
 with open('damaging-badfaith-labels.json') as f:
     content = json.load(f)
     with open('../feature-gen/20k-features-damaging-2.tsv') as f1:
-        for line in f1.readlines()[:10000]:
+        lines = [x.strip() for x in f1.readlines()]
+        random.shuffle(lines)
+        for line in lines[:11000]:
             i = [x.strip() for x in line.split('\t')]
             diff = i[0]
             ftr = [processFeatures(a) for a in i[1:]]
             training_features.append((ftr, True if content[diff] else False))
-        f1.seek(0)
-        for line in f1.readlines()[10001:]:
+        for line in lines[11001:]:
             i = [x.strip() for x in line.split('\t')]
             diff = i[0]
             ftr = [processFeatures(a) for a in i[1:]]
@@ -72,7 +73,7 @@ stats = is_reverted.test(testing_features)
 
 print(is_reverted.info.format())
 
-with open('damaging-2020-2.model', 'wb') as model_file:
+with open('damaging-2020-3.model', 'wb') as model_file:
     is_reverted.dump(model_file)
 
 # with open('damaging-2020.model', 'rb') as model_file:
