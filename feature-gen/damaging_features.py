@@ -15,7 +15,7 @@ from revscoring.errors import TextDeleted, RevisionNotFound
 
 logging.getLogger('mwapi').setLevel(logging.ERROR) # silence 1.19 warnings
 
-with open('20k-revisions.txt') as f:
+with open('2100-cynthia-revs.txt') as f:
     revisions = [(re.search('([0-9]+)$', i.strip()).group(1), 
                     re.search('^(https:\/\/.*?)\/wiki\/', i.strip()).group(1)) 
                     for i in f.readlines()]

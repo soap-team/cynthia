@@ -81,8 +81,8 @@ def score_revision(wiki, rev_id, model):
         response = jsonify(raw_response)
         if raw_response['probability'] >= 0.5:
             app.logger.info(',' + wiki + ',' + str(rev_id) + ',' + model + ',' + str(raw_response['probability']))
-        else:
-            app.logger.info(',untracked,,' + model + ',' + str(raw_response['probability']))
+        # else:
+            # app.logger.info(',untracked,,' + model + ',' + str(raw_response['probability']))
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
     except Exception as e:
