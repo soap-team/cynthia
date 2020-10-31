@@ -1,0 +1,14 @@
+{
+  "name": "review-script",
+  "version": "1.0.0",
+  "description": "Adds diffs to the labelling interface for review.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "SOAP",
+  "license": "ISC",
+  "dependencies": {
+    "firebase-admin": "^9.3.0"
+  }
+}

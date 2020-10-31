@@ -1,0 +1,7 @@
+{
+	"enabled": true,
+	"scores_file": "../api/scores.log",
+	"dataset_name": "cynthia-v3-review",
+	"threshold": 0.85,
+	"worksets": {}
+}
