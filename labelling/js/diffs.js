@@ -169,7 +169,7 @@ function showDiff(wiki, revid) {
                 $('.category').hide();
                 $('#report').show();
                 var username = d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].user;
-                $('#diff-container').append('<span>user: </span><a href="' + wiki + '/wiki/Special:Contributions/' + encodeURIComponent(username.replace(/ /g, '_')) + '" target="_blank">' + username + '</a>');
+                $('#diff-container').append('<span>user: </span><a href="' + wiki + '/wiki/Special:Contributions' + encodeURIComponent(username.replace(/ /g, '_')) + '" target="_blank">' + username + '</a>');
             } else {
                 $('#report').hide();
                 $('.category').show();
