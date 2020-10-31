@@ -1,5 +1,7 @@
 {
-	"enabled": true,
+	"enabled": false,
+	"perform_cleanup": true,
+	"days_before_cleanup": 7,
 	"scores_file": "../api/scores.log",
 	"dataset_name": "cynthia-v3-review",
 	"threshold": 0.85,

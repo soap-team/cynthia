@@ -54,13 +54,40 @@ function connect() {
     return db;
 }
 
+async function getWorksetsToClean(db, datasetName, days) {
+    let daysinms = days * 24 * 60 * 60 * 1000;
+    let datasetRef = db.ref(`categorised/${datasetName}/`);
+    await datasetRef.remove();
+
+    let worksets = [];
+    datasetRef = db.ref(`datasets/${datasetName}/`);
+    await datasetRef.once('value', function(snap) {
+        Object.keys(snap.val()).forEach((ws) => {
+            let wsDate = new Date(ws.slice(3, 23));
+            
+            // If the workset is old enough, delete from db
+            if (new Date() - wsDate > daysinms) {
+                worksets.push(ws);
+            }
+        });
+    });
+
+    return worksets;
+}
+
 async function run() {
     // Get config
     let configRaw = fs.readFileSync('./config.json');
     let config = JSON.parse(configRaw);
 
+    if (!config.enabled) {
+        return;
+    }
+
+    fs.renameSync(config.scores_file, 'scores-temp.log');
+
     // Get diffs
-    let [diffs, scores] = await parseScoreFile(config.scores_file, config.threshold);
+    let [diffs, scores] = await parseScoreFile('scores-temp.log', config.threshold);
     // Split diffs into worksets
     let worksets = [], worksetScores = [];
     while (diffs.length) {
@@ -76,7 +103,7 @@ async function run() {
     let datasetStatuses = {}; // used to fill in /datasets/ in Firebase
     let datasetScores = {}; // used to fill in /scores/ in Firebase
 
-    let datetime = new Date().toISOString().slice(0,19).replace(/[-:TZ]/g,'');
+    let datetime = new Date().toISOString().slice(0,19) + 'Z';
     for (let wsid in worksets) {
         let worksetname = `ws-${datetime}-${wsid}`;
         let data = {};
@@ -84,7 +111,7 @@ async function run() {
         await datasetRef.update(data);
         datasetStatuses[worksetname] = 0;
         datasetScores[worksetname] = worksetScores[wsid];
-        console.log(`uploaded workset ${worksetname}`);
+        // console.log(`uploaded workset ${worksetname}`);
     }
 
     // Update /datasets/
@@ -95,10 +122,22 @@ async function run() {
     datasetRef = db.ref(`scores/${datasetName}/`);
     await datasetRef.update(datasetScores);
 
+    fs.unlinkSync('scores-temp.log');
 
+    // Clean up Firebase if requested
+    if (config.perform_cleanup) {
+        let worksetsToClean = await getWorksetsToClean(db, datasetName, config.days_before_cleanup);
+
+        for (let ws of worksetsToClean) {
+            let wsCleanRef = db.ref(`scores/${datasetName}/${ws}/`);
+            await wsCleanRef.remove();
+            wsCleanRef = db.ref(`uncategorised/${datasetName}/${ws}/`);
+            await wsCleanRef.remove();
+            wsCleanRef = db.ref(`datasets/${datasetName}/${ws}/`);
+            await wsCleanRef.remove();
+        }
+    }
+    admin.app().delete();
 }
 
-run().then(() => {
-    // Upon completion, close connection to Firebase
-    admin.app().delete();
-});
+run();
