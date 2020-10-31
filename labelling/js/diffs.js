@@ -165,6 +165,14 @@ function showDiff(wiki, revid) {
             $('#diff-container').empty().append('<h3>' + d.query.pages[Object.keys(d.query.pages)[0]].title + '</h3>');
             $('#diff-container').append('comment: ' + d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].comment + '<br/>');
             $('#diff-container').append('<a href="' + diffLink + '" target="_blank">' + diffLink + '</a>');
+            if (dataset.includes('-review')) {
+                $('.category').hide();
+                $('#report').show();
+                $('#diff-container').append('<a href="' +  + '" target="_blank">' + 'user: ' + d.query.pages[Object.keys(d.query.pages)[0]].user + '</a>');
+            } else {
+                $('#report').hide();
+                $('.category').show();
+            }
             $('#diff-container').append('<table id="diff" class="diff"><tbody></tbody></table>');
             $('#diff').prepend('<colgroup><col class="diff-marker">' +
                 '<col class="diff-content">' +
@@ -224,6 +232,37 @@ function categoriseDiff(wiki, revid) {
     deleteFirstDiff();
 }
 
+// Reports the diff as a false positive using a discord webhook
+function reportFalsePositive(diff) {
+    if (dataset !== '') {
+        console.log('false positive reported');
+        var score = 0;
+        db.ref('config/webhook/').once('value').then(function(snapshot) {
+            var webhookUrl = snapshot.val();
+            $.ajax({
+                url: webhookUrl,
+                type: 'POST',
+                data: JSON.stringify({
+                    embeds: [
+                    {
+                        title: '<' + diff + '>',
+                        description: 'score: ' + score,
+                        url: diff,
+                        color: 15253632
+                    }
+                    ]
+                }),
+                'contentType': "application/json"
+            });
+        });
+    } else {
+        console.log('Error reporting diff');
+        $('#diff-container').empty().append("Something went wrong with reporting the diff. Please refresh the page and try again.");
+
+    }
+    deleteFirstDiff();
+}
+
 // Deletes the first key in the workset and gets the next one
 function deleteFirstDiff() {
     if (dataset !== '' && workset !== '') {
@@ -273,6 +312,12 @@ function init() {
         $('#spam').prop('checked', false);
         $('#goodfaith').prop('checked', false);
     });
+    $('#report').on('click', function() {
+        var wiki = diffLink.split('wiki/')[0];
+        var revid = diffLink.split('diff=').pop();
+        //categoriseDiff(wiki, revid);
+        reportFalsePositive(diffLink);
+    });
     $('#dataset').on('click', '.dataset-buttons', function() {
         dataset = $(this).data('id');
         console.log(dataset);
@@ -307,8 +352,11 @@ function init() {
             else if (e.charCode === 103) { // g
                 $('#goodfaith').prop('checked', !$('#goodfaith').prop('checked'));
             }
-            else if (e.charCode === 110) {
+            else if (e.charCode === 110) { // n
                 $('#next').click();
+            }
+            else if (e.charCode === 102) { // f
+                $('#report').click();
             }
         }
     });
