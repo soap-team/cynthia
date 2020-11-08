@@ -164,11 +164,12 @@ function showDiff(wiki, revid) {
         if (d.query.pages) {
             $('#diff-container').empty().append('<h3>' + d.query.pages[Object.keys(d.query.pages)[0]].title + '</h3>');
             $('#diff-container').append('comment: ' + d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].comment + '<br/>');
-            $('#diff-container').append('<a href="' + diffLink + '" target="_blank">' + diffLink + '</a>');
+            $('#diff-container').append('<a href="' + diffLink + '" target="_blank">' + diffLink + '</a><br/>');
             if (dataset.includes('-review')) {
                 $('.category').hide();
                 $('#report').show();
-                $('#diff-container').append('<a href="' +  + '" target="_blank">' + 'user: ' + d.query.pages[Object.keys(d.query.pages)[0]].user + '</a>');
+                var username = d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].user;
+                $('#diff-container').append('<span>user: </span><a href="' + wiki + '/wiki/Special:Contributions' + encodeURIComponent(username.replace(/ /g, '_')) + '" target="_blank">' + username + '</a>');
             } else {
                 $('#report').hide();
                 $('.category').show();
