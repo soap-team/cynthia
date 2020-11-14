@@ -14,6 +14,7 @@ var db = firebase.database();
 var dataset = '';
 var diffLink = '';
 var workset = '';
+var diffKey = '';
 var diffScore = '';
 
 var keypressEnabled = false;
@@ -137,7 +138,7 @@ function getNextDiff() {
             if (snapshot.exists()) {
                 snapshot.forEach(function(e) {
                     diffLink = e.val();
-                    var diffKey = e.key;
+                    diffKey = e.key;
                     var wiki = diffLink.split('wiki/')[0];
                     var revid = diffLink.split('diff=').pop();
                 	db.ref('scores/' + dataset + '/' + workset + '/' + diffKey + '/').once('value').then(function(data) {
@@ -276,6 +277,7 @@ function deleteFirstDiff() {
         dbRef.once('value').then(function(snapshot) {
             console.log('removed key: ' + Object.keys(snapshot.val())[0]);
             dbRef.child(Object.keys(snapshot.val())[0]).remove();
+            db.ref('scores/' + dataset + '/' + workset + '/' + diffKey + '/').remove();
             getNextDiff();
         });
     } else {
