@@ -276,9 +276,11 @@ function deleteFirstDiff() {
         dbRef = db.ref('uncategorised/' + dataset + '/' + workset + '/');
         dbRef.once('value').then(function(snapshot) {
             console.log('removed key: ' + Object.keys(snapshot.val())[0]);
-            dbRef.child(Object.keys(snapshot.val())[0]).remove();
-            db.ref('scores/' + dataset + '/' + workset + '/' + diffKey + '/').remove();
-            getNextDiff();
+            dbRef.child(Object.keys(snapshot.val())[0]).remove().then(function() {
+            	db.ref('scores/' + dataset + '/' + workset + '/' + diffKey + '/').remove().then(function() {
+            		getNextDiff();
+            	});
+            });
         });
     } else {
         console.log('Error deleting diff');
