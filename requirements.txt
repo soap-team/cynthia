@@ -45,7 +45,7 @@ pyenchant==1.6.11
 pyflakes==1.5.0
 python-dateutil==2.8.1
 pytz==2020.1
-PyYAML==4.2b4
+PyYAML==5.4
 redis==3.5.2
 regex==2020.5.14
 requests==2.23.0
