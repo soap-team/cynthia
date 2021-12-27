@@ -37,7 +37,7 @@ mwbase==0.1.4
 mwparserfromhell==0.5.4
 mwtypes==0.3.2
 mysqltsv==0.0.7
-nltk==3.5
+nltk==3.6.5
 numpy==1.18.4
 pkg-resources==0.0.0
 pycodestyle==2.3.1
