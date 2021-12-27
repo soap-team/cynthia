@@ -1,0 +1,12 @@
+{
+    "irc": {
+        "network": "wikia",
+        "rc": "#rc"
+    },
+    "models": {
+        "en-damaging": "damaging-2020-3.model"
+    },
+    "user_agent": "Cynthia/1.3 (ML vandalism detection; User:Noreplyz)",
+    "discord": [
+    ]
+}

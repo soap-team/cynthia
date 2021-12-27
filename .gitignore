@@ -1,5 +1,4 @@
-api/config.json
-review-script/soap-cynthia-firebase-serviceaccountkey.json
+review-script/soap-cynthia-firebase-*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

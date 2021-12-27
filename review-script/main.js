@@ -42,7 +42,7 @@ async function parseScoreFile(file, threshold) {
  * @return Firebase database
  */
 function connect() {
-    let serviceAccount = require("./soap-cynthia-firebase-serviceaccountkey.json");
+    let serviceAccount = require("./soap-cynthia-firebase-key-secret-wow.json");
 
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
