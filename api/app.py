@@ -45,6 +45,7 @@ handler = logging.handlers.WatchedFileHandler('scores.log')
 formatter = logging.Formatter("[%(asctime)s] %(message)s")
 handler.setFormatter(formatter)
 app.logger.setLevel(logging.INFO)
+app.logger.info(app.import_name)
 default_handler.setLevel(logging.ERROR)
 app.logger.addHandler(handler)
 

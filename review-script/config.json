@@ -1,6 +1,6 @@
 {
 	"enabled": false,
-	"perform_cleanup": true,
+	"perform_cleanup": false,
 	"days_before_cleanup": 7,
 	"scores_file": "../api/scores.log",
 	"dataset_name": "cynthia-v3-review",
