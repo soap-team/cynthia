@@ -44,7 +44,7 @@ prometheus-client==0.8.0
 pyenchant==1.6.11
 python-dateutil==2.8.1
 pytz==2020.1
-PyYAML==4.2b4
+PyYAML==5.4
 redis==3.5.3
 regex==2020.7.14
 requests==2.25.1
