@@ -14,7 +14,7 @@ docutils==0.15.2
 editquality==0.5.0
 flashtext==2.7
 Flask==1.1.2
-Flask-Cors==3.0.8
+Flask-Cors==3.0.9
 flower==0.9.7
 future==0.18.2
 gensim==3.8.3
