@@ -38,7 +38,7 @@ mwparserfromhell==0.5.4
 mwtypes==0.3.2
 mysqltsv==0.0.7
 nltk==3.6.2
-numpy==1.18.5
+numpy==1.22.0
 pkg-resources==0.0.0
 prometheus-client==0.8.0
 pyenchant==1.6.11
