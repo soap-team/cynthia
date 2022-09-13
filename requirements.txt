@@ -15,7 +15,7 @@ editquality==0.5.0
 flashtext==2.7
 Flask==1.1.2
 Flask-Cors==3.0.8
-flower==0.9.7
+flower==1.2.0
 future==0.18.2
 gensim==3.8.3
 hanziconv==0.3.2
