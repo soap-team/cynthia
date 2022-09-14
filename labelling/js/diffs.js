@@ -14,6 +14,8 @@ var db = firebase.database();
 var dataset = '';
 var diffLink = '';
 var workset = '';
+var diffKey = '';
+var diffScore = '';
 
 var keypressEnabled = false;
 
@@ -136,9 +138,13 @@ function getNextDiff() {
             if (snapshot.exists()) {
                 snapshot.forEach(function(e) {
                     diffLink = e.val();
+                    diffKey = e.key;
                     var wiki = diffLink.split('wiki/')[0];
                     var revid = diffLink.split('diff=').pop();
-                    showDiff(wiki, revid);
+                	db.ref('scores/' + dataset + '/' + workset + '/' + diffKey + '/').once('value').then(function(data) {
+                		diffScore = data.val();
+                    	showDiff(wiki, revid);
+                	});
                     return true;
                 });    
             } else {
@@ -169,7 +175,8 @@ function showDiff(wiki, revid) {
                 $('.category').hide();
                 $('#report').show();
                 var username = d.query.pages[Object.keys(d.query.pages)[0]].revisions[0].user;
-                $('#diff-container').append('<span>user: </span><a href="' + wiki + '/wiki/Special:Contributions' + encodeURIComponent(username.replace(/ /g, '_')) + '" target="_blank">' + username + '</a>');
+                $('#diff-container').append('<span>user: </span><a href="' + wiki + '/wiki/Special:Contributions' + encodeURIComponent(username.replace(/ /g, '_')) + '" target="_blank">' + username + '</a><br/>');
+		        $('#diff-container').append('score: ' + diffScore + '<br/>');
             } else {
                 $('#report').hide();
                 $('.category').show();
@@ -237,8 +244,7 @@ function categoriseDiff(wiki, revid) {
 function reportFalsePositive(diff) {
     if (dataset !== '') {
         console.log('false positive reported');
-        var score = 0;
-        db.ref('config/webhook/').once('value').then(function(snapshot) {
+    	db.ref('config/webhook/').once('value').then(function(snapshot) {
             var webhookUrl = snapshot.val();
             $.ajax({
                 url: webhookUrl,
@@ -247,7 +253,7 @@ function reportFalsePositive(diff) {
                     embeds: [
                     {
                         title: '<' + diff + '>',
-                        description: 'score: ' + score,
+                        description: 'score: ' + diffScore,
                         url: diff,
                         color: 15253632
                     }
@@ -270,8 +276,11 @@ function deleteFirstDiff() {
         dbRef = db.ref('uncategorised/' + dataset + '/' + workset + '/');
         dbRef.once('value').then(function(snapshot) {
             console.log('removed key: ' + Object.keys(snapshot.val())[0]);
-            dbRef.child(Object.keys(snapshot.val())[0]).remove();
-            getNextDiff();
+            dbRef.child(Object.keys(snapshot.val())[0]).remove().then(function() {
+            	db.ref('scores/' + dataset + '/' + workset + '/' + diffKey + '/').remove().then(function() {
+            		getNextDiff();
+            	});
+            });
         });
     } else {
         console.log('Error deleting diff');
