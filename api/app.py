@@ -87,6 +87,7 @@ def score_revision(wiki, rev_id, model):
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
     except Exception as e:
+        app.logger.critical(e, exc_info=True)
         response = jsonify({
             'error': 'General issue: ' + str(repr(e)),
             'probability': -1

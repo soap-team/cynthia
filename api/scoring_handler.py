@@ -24,9 +24,9 @@ class ScoringHandler:
     # Check if page is in a scoreable namespace.
     def is_scoreable_namespace(self, wiki, diff):
         if '.gamepedia.com' in wiki:
-            page_data = requests.get(wiki + '/api.php?action=query&meta=siteinfo&siprop=namespaces&prop=info&revids=' + diff + '&format=json')
+            page_data = requests.get(wiki + '/api.php?action=query&meta=siteinfo&siprop=namespaces&prop=info&revids=' + diff + '&format=json', headers={'User-Agent': self.config['user_agent']})
         else:
-            page_data = requests.get(wiki + '/api.php?action=query&prop=info&revids=' + diff + '&format=json')
+            page_data = requests.get(wiki + '/api.php?action=query&prop=info&revids=' + diff + '&format=json', headers={'User-Agent': self.config['user_agent']})
         try:
             page_data = page_data.json()
             page_id = next(iter(page_data['query']['pages']))
@@ -45,7 +45,7 @@ class ScoringHandler:
 
     # Get verbose information (title and user) on a particular diff
     def get_verbose_info(self, wiki, diff):
-        page_data = requests.get(wiki + '/api.php?action=query&prop=revisions&rvprop=user&revids=' + diff + '&format=json')
+        page_data = requests.get(wiki + '/api.php?action=query&prop=revisions&rvprop=user&revids=' + diff + '&format=json', headers={'User-Agent': self.config['user_agent']})
         try:
             page_data = page_data.json()
             page_id = next(iter(page_data['query']['pages']))
